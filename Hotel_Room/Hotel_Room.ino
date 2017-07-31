@@ -51,8 +51,8 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 
 char *myRoom = "room1";
-char *mqtt_user = "pi";
-char *mqtt_password = "=hk'ohvp";
+char *mqtt_user = "chang";
+char *mqtt_password = "chang";
 char *room_status = "room1/status";
 
 int mqtt_reconnect = 0;

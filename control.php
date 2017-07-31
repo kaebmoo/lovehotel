@@ -1,6 +1,5 @@
-// kaebmoo 2017
-
 <?php
+// kaebmoo 2017
 
 use Mosquitto\Client;
 use Mosquitto\Message;
@@ -88,6 +87,7 @@ $db = new PDO('mysql:host=localhost;dbname=mqtt_logs;charset=utf8', 'mqtt_logs',
 
 /* Configure our Client */
 $mqtt = new Client();
+$mqtt->setCredentials('chang', 'chang);
 $mqtt->connect('localhost');
 
 $logger = new MqttToDb($mqtt, $db);
