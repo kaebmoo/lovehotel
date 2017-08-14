@@ -42,7 +42,7 @@ const int relayPin = D1;
 const int buzzer=D5; //Buzzer control port, default D5
 
 byte mac[6] { 0x60, 0x01, 0x94, 0x82, 0x85, 0x54};
-IPAddress ip(192, 168, 9, 101);
+IPAddress ip(192, 168, 9, 201);
 IPAddress gateway(192, 168, 9, 1);
 IPAddress subnet(255, 255, 255, 0);
 IPAddress server(192, 168, 9, 1);
@@ -50,10 +50,10 @@ IPAddress server(192, 168, 9, 1);
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-char *myRoom = "room1";
+char *myRoom = "room201";
 char *mqtt_user = "chang";
 char *mqtt_password = "chang";
-char *room_status = "room1/status";
+char *room_status = "room201/status";
 
 int mqtt_reconnect = 0;
 
