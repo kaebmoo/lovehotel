@@ -23,6 +23,8 @@ SOFTWARE.
 
 */
 
+// love hotel version 1
+
 #include <PubSubClient.h>
 #include "ESP8266WiFi.h"
 #include <BlynkSimpleEsp8266.h>
