@@ -50,12 +50,24 @@ IPAddress server(192, 168, 9, 1);
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-char *myRoom = "room201";
+char *myRoom = "room/2";
 char *mqtt_user = "chang";
 char *mqtt_password = "chang";
-char *room_status = "room201/status";
+char *room_status = "room/2/status";
+char *room_start = "room/2/start";
+char *room_stop = "room/2/stop";
+char *room_currenttime = "room/currenttime";
 
 int mqtt_reconnect = 0;
+// int flagtime = 0;
+boolean on = false;
+boolean bstart = false;
+boolean bstop = false;
+boolean bcurrent = false;
+boolean force = false;
+unsigned long starttime;
+unsigned long stoptime;
+unsigned long currenttime;
 
 void buzzer_sound()
 {
@@ -77,26 +89,88 @@ void buzzer_sound()
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {
-  /*
-  char *room_status;
-  char *topic = "/status";
-
-  room_status = malloc(strlen(myRoom)+strlen(topic)+1);
-  strcpy(room_status, "");
-  strcat(room_status, myRoom);
-  strcat(room_status, topic);
-  */
+ 
+  String strStart = "";
+  String strStop = "";
+  String strCurrenttime = "";
+  
+  int i;
 
   Serial.print("Message arrived [");
   Serial.print(topic);
   Serial.print("] ");
-  for (int i = 0; i < length; i++) {
+  for (i = 0; i < length; i++) {
     Serial.print((char)payload[i]);
   }
   Serial.println();
 
-  // Switch on the LED if an 1 was received as first character
-  if ((char)payload[0] == '1') {
+  if(strcmp(topic, myRoom) == 0) {
+    // Switch on the LED if an 1 was received as first character
+    if ((char)payload[0] == '1') {      
+      relay(true);
+      force = true;
+
+    } else if ((char)payload[0] == '0') {
+      
+      relay(false);
+      force = false;
+      
+    }
+  }
+  if (strcmp(topic, room_start) == 0) {
+    
+    for(i = 0; i < length; i++) {
+      strStart += (char)payload[i];
+    }
+
+    starttime = strStart.toInt();
+    strStart = "";
+    
+    bstart = true;
+ 
+    
+  }
+  if (strcmp(topic, room_stop) == 0) {
+    
+    for(i = 0; i < length; i++) {
+      strStop += (char)payload[i];
+    }  
+    stoptime = strStop.toInt();
+    strStop = "";
+    
+    bstop = true;
+  }
+  if (strcmp(topic, room_currenttime) == 0) {
+    
+    for(i = 0; i < length; i++) {
+      strCurrenttime += (char)payload[i];
+    }
+
+    currenttime = strCurrenttime.toInt();
+    strCurrenttime = "";
+
+    bcurrent = true;
+
+  }
+  if (bstart && bstop && bcurrent && !force) {
+    if ( (currenttime >= starttime) && (currenttime <= stoptime) ) {
+      if (!on) {
+        relay(true);  
+      }
+    }
+    else if (on) {
+      relay(false);
+    }
+    
+  }
+
+
+}
+
+void relay(boolean set)
+{
+  if (set) {
+    on = true;
     digitalWrite(relayPin, HIGH);
     digitalWrite(BUILTIN_LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
     // but actually the LED is on; this is because
@@ -106,15 +180,22 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.print(room_status);
     Serial.println(" : ON");
     buzzer_sound();
-  } else {
+    
+  }
+  else {
+    on = false;
     digitalWrite(relayPin, LOW);
     digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
     client.publish(room_status,"OFF", true);
     Serial.print(room_status);
     Serial.println(" : OFF");
-  }
 
-  //free(room_status);
+    delay(500);
+    digitalWrite(BUILTIN_LED, LOW);
+    delay(500);
+    digitalWrite(BUILTIN_LED, HIGH);
+    
+  }
 }
 
 void setup_wifi() {
@@ -167,6 +248,9 @@ void reconnect() {
       client.publish(room_status, "hello world");
       // ... and resubscribe
       client.subscribe(myRoom);
+      client.subscribe(room_start);
+      client.subscribe(room_stop);
+      client.subscribe(room_currenttime);
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
@@ -219,6 +303,9 @@ void setup() {
   if (client.connect(myRoom, mqtt_user, mqtt_password)) {
     client.publish(room_status,"hello world");
     client.subscribe(myRoom);
+    client.subscribe(room_start);
+    client.subscribe(room_stop);
+    client.subscribe(room_currenttime);
   }
 
   delay(500);
