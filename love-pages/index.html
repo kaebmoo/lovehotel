@@ -305,8 +305,12 @@
         //if ($('#room1option'))
           console.log($(this).attr('id'));
           //console.log($(this).attr('id'));
-          console.log($('#room1option').attr('id'));
+          //console.log($('#room1option').attr('id'));
 
+      })
+
+      $('#room1option :input, #room2option :input, #room3option :input').change(function (e) {
+        console.log($(this).attr('id'));
       })
 
     })
