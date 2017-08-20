@@ -8,7 +8,7 @@ readonly MIN=1
 readonly HOUR=3600
 readonly ON="ON"
 readonly OFF="OFF"
-HOST="register.local"
+HOST="localhost"
 
 ((min=MIN*$1))
 ((hour=HOUR*$1))

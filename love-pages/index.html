@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Love Hotel - Control</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="bootstrap-switch-3.3.4/dist/css/bootstrap3/bootstrap-switch.css" rel="stylesheet">
+    <link href="bootstrap-toggle/css/bootstrap-toggle.min.css" rel="stylesheet">
+
+
+    <!-- Custom styles for this template -->
+    <style>
+    body {
+        padding-top: 54px;
+    }
+
+    @media (min-width: 992px) {
+        body {
+            padding-top: 56px;
+        }
+    }
+    </style>
+
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <a class="navbar-brand" href="index.html">Love Hotel</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="about.html">About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="services.html">Services</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="contact.html">Contact</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-left">
+                <h1 class="mt-5">Love Hotel Control</h1>
+                <p class="lead">Complete with pre-defined file paths and responsive navigation!</p>
+                <ul class="list-unstyled">
+                    <li>Bootstrap 4.0.0-beta</li>
+                    <li>jQuery 3.2.1</li>
+                </ul>
+            </div>
+
+            <div class="col-lg-12 text-left">
+            <p>  Room 01
+                <div id="room1option" class="btn-group px-1" data-toggle="buttons">
+                  <label class="btn btn-outline-secondary">
+                    <input type="radio" name="options" id="1" autocomplete="off" checked> 1 Hour
+                  </label>
+                  <label class="btn btn-outline-secondary active">
+                    <input type="radio" name="options" id="2" autocomplete="off"> 2 Hours
+                  </label>
+                  <label class="btn btn-outline-secondary">
+                    <input type="radio" name="options" id="3" autocomplete="off"> 3 Hours
+                  </label>
+                  <label class="btn btn-outline-secondary">
+                    <input type="radio" name="options" id="24" autocomplete="off"> 24 Hours
+                  </label>
+                </div>
+                <input id="room1" checked data-toggle="toggle" type="checkbox" data-on="ON" data-off="OFF" data-onstyle="danger" data-offstyle="light">
+
+                <!--
+                <button type="button" class="btn btn-light toggle-text" data-toggle="collapse">
+                  <span>OFF </span><span class="hidden">ON </span>
+                </button>
+              -->
+                <span id="timer1" class="badge badge-secondary">00:00</span>
+              </p>
+                <p>
+                  Room 02
+                <div id="room2option" class="btn-group px-1" data-toggle="buttons">
+                  <label class="btn btn-outline-secondary">
+                    <input type="radio" name="options" id="1" autocomplete="off" checked> 1 Hour
+                  </label>
+                  <label class="btn btn-outline-secondary active">
+                    <input type="radio" name="options" id="2" autocomplete="off"> 2 Hours
+                  </label>
+                  <label class="btn btn-outline-secondary">
+                    <input type="radio" name="options" id="3" autocomplete="off"> 3 Hours
+                  </label>
+                  <label class="btn btn-outline-secondary">
+                    <input type="radio" name="options" id="24" autocomplete="off"> 24 Hours
+                  </label>
+                </div>
+                <input id="room2" checked data-toggle="toggle" type="checkbox" data-on="ON" data-off="OFF" data-onstyle="danger" data-offstyle="light">
+                <span id="timer2" class="badge badge-secondary">00:00</span>
+                </p>
+                <p>
+                Room 03
+                <div id="room3option" class="btn-group px-1" data-toggle="buttons">
+                  <label class="btn btn-outline-secondary">
+                    <input type="radio" name="options" id="1" autocomplete="off" checked> 1 Hour
+                  </label>
+                  <label class="btn btn-outline-secondary active">
+                    <input type="radio" name="options" id="2" autocomplete="off"> 2 Hours
+                  </label>
+                  <label class="btn btn-outline-secondary">
+                    <input type="radio" name="options" id="3" autocomplete="off"> 3 Hours
+                  </label>
+                  <label class="btn btn-outline-secondary">
+                    <input type="radio" name="options" id="24" autocomplete="off"> 24 Hours
+                  </label>
+                </div>
+                <input id="room3" checked data-toggle="toggle" type="checkbox" data-on="ON" data-off="OFF" data-onstyle="danger" data-offstyle="light">
+                <span id="timer3" class="badge badge-secondary">00:00</span>
+                </p>
+              </div>
+
+
+
+            <div class="col-lg-6 text-center">
+
+            </dev>
+
+
+<!--
+            <button type="button" class="btn">Basic</button>
+            <div class="form-group">
+            <label for="Room1Hour">Hour</label>
+            <select class="form-control" id="Room1Hour">
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+              <option>6</option>
+              <option>24</option>
+
+              </select>
+              </div>
+
+              <div class="col-lg-6">
+                  <div class="input-group">
+                    <input type="text" class="form-control" aria-label="Text input with dropdown button">
+                    <div class="input-group-btn">
+                      <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        ON
+                      </button>
+                      <div class="dropdown-menu dropdown-menu-right">
+                        <a class="dropdown-item" href="#">1 hour</a>
+                        <a class="dropdown-item" href="#">2 hours</a>
+                        <a class="dropdown-item" href="#">3 hours</a>
+                        <div role="separator" class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#">24 hours</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+-->
+
+
+        </div>
+
+    </div>
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/popper/popper.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+    <script src="bootstrap-toggle/js/bootstrap-toggle.min.js"></script>
+
+    <script src="bootstrap-switch-3.3.4/dist/js/bootstrap-switch.js"></script>
+    <script src="paho.javascript-1.0.3/paho-mqtt.js"></script>
+    <script src="node_modules/timer.js/dist/timer.js"></script>
+
+    <script>
+    $('.hidden').removeClass('hidden').hide();
+    $('.toggle-text').click(function() {
+      $(this).find('span').each(function() {
+        $(this).toggle();
+      });
+    });
+
+    $('.button').click(function() {
+      $('.button').removeClass('btn-light').addClass('btn-primary ');
+      $(this).addClass('btn-light').removeClass('btn-primary ');
+    });
+    </script>
+
+    <script>
+
+    // Create a client instance: Broker, Port, Websocket Path, Client ID
+    client = new Paho.MQTT.Client("localhost", Number(1884), "/ws", "lovehotelcontrol");
+
+    // set callback handlers
+    client.onConnectionLost = onConnectionLost;
+    client.onMessageArrived = onMessageArrived;
+
+    // connect the client
+    client.connect({onSuccess:onConnect, userName : "chang", password : "chang"});
+
+    // called when the client connects
+    function onConnect() {
+      // Once a connection has been made, make a subscription and send a message.
+      console.log("onConnect");
+      client.subscribe("room/+/timer");
+      client.subscribe("room/+/status");
+      //client.subscribe("room/2/timer");
+      //client.subscribe("room/3/timer");
+      // message = new Paho.MQTT.Message("Hello");
+      // message.destinationName = "/World";
+      // client.send(message);
+    }
+
+    // called when the client loses its connection
+    function onConnectionLost(responseObject) {
+      if (responseObject.errorCode !== 0) {
+        console.log("onConnectionLost:"+responseObject.errorMessage);
+      }
+    }
+
+    // called when a message arrives
+    function onMessageArrived(message) {
+      console.log("onMessageArrived:"+message.payloadString);
+      switch (message.destinationName) {
+        case "room/1/timer" :
+          document.getElementById('timer1').innerHTML = message.payloadString;
+          break;
+        case "room/2/timer" :
+          document.getElementById('timer2').innerHTML = message.payloadString;
+          break;
+        case "room/3/timer" :
+          document.getElementById('timer3').innerHTML = message.payloadString;
+          break;
+        case "room/1/status" :
+          //console.log(message.payloadString);
+          if (message.payloadString == "OFF") {
+            $('#room1').bootstrapToggle('off');
+          }
+          else if (message.payloadString == "ON") {
+            $('#room1').bootstrapToggle('on');
+          }
+          break;
+        case "room/2/status" :
+          //console.log(message.payloadString);
+          if (message.payloadString == "OFF") {
+            $('#room2').bootstrapToggle('off');
+          }
+          else if (message.payloadString == "ON") {
+            $('#room2').bootstrapToggle('on');
+          }
+          break;
+        case "room/3/status" :
+          //console.log(message.payloadString);
+          if (message.payloadString == "OFF") {
+            $('#room3').bootstrapToggle('off');
+          }
+          else if (message.payloadString == "ON") {
+            $('#room3').bootstrapToggle('on');
+          }
+          break;
+      }
+
+    }
+
+
+
+    // document.getElementById('timer3').innerHTML = "99:99"
+  </script>
+  <script>
+    $(function() {
+      $('#room1, #room2, #room3').change(function(e) {
+        // $('#console-event').html('Toggle: ' + $(this).prop('checked'))
+        if ($(this).prop('checked')) {
+          console.log(e.currentTarget.id+" : ON");
+        }
+        else {
+          console.log(e.currentTarget.id+" : OFF");
+        }
+      })
+    })
+
+    $(function() {
+      //$('#room1option :input, #room2option :input, #room3option :input').change(function (e) {
+      $('.btn-group').change(function (e) {
+
+        //if ($('#room1option'))
+          console.log($(this).attr('id'));
+          //console.log($(this).attr('id'));
+          console.log($('#room1option').attr('id'));
+
+      })
+
+    })
+
+
+  </script>
+
+
+</body>
+
+</html>

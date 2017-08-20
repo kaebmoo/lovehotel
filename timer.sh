@@ -8,6 +8,7 @@ fi
 
 m=${1}-1
 room=${2}
+HOST="localhost"
 
 Floor () {
   DIVIDEND=${1}
@@ -27,7 +28,7 @@ Timecount(){
         while [ $MIN -ge 0 ]; do
                 while [ $SEC -ge 0 ]; do
                         # mosquitto_pub -h localhost -t room/1/timer -m """$HOUR":"$MIN":"$SEC"""
-                        mosquitto_pub -h register.local -t $r/timer -m $(printf "%02d:%02d:%02d" $HOUR $MIN $SEC) -u chang -P "chang"
+                        mosquitto_pub -h $HOST -t $r/timer -m $(printf "%02d:%02d:%02d" $HOUR $MIN $SEC) -u chang -P "chang"
                         # printf "%02d:%02d:%02d\033[0K\r" $HOUR $MIN $SEC
 
                         SEC=$((SEC-1))
