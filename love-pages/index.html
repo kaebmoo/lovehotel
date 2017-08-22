@@ -85,13 +85,8 @@
                     <input type="radio" name="options" value="24" autocomplete="off" checked> 24 Hours
                   </label>
                 </div>
-                <input id="room1" checked data-toggle="toggle" type="checkbox" data-on="ON" data-off="OFF" data-onstyle="danger" data-offstyle="light">
-
-                <!--
-                <button type="button" class="btn btn-light toggle-text" data-toggle="collapse">
-                  <span>OFF </span><span class="hidden">ON </span>
-                </button>
-              -->
+                | Switch <input id="room1" checked data-toggle="toggle" type="checkbox" data-on="ON" data-off="OFF" data-onstyle="danger" data-offstyle="light">
+                | Status <input id="room1status" checked data-toggle="toggle" data-size="small" type="checkbox" data-on="Open" data-off="Close" data-onstyle="success" data-offstyle="light">
                 <span id="timer1" class="badge badge-secondary">00:00</span>
               </p>
                 <p>
@@ -110,7 +105,8 @@
                     <input type="radio" name="options" value="24" autocomplete="off"> 24 Hours
                   </label>
                 </div>
-                <input id="room2" checked data-toggle="toggle" type="checkbox" data-on="ON" data-off="OFF" data-onstyle="danger" data-offstyle="light">
+                | Switch <input id="room2" checked data-toggle="toggle" type="checkbox" data-on="ON" data-off="OFF" data-onstyle="danger" data-offstyle="light">
+                | Status <input id="room2status" checked data-toggle="toggle" data-size="small" type="checkbox" data-on="Open" data-off="Close" data-onstyle="success" data-offstyle="light">
                 <span id="timer2" class="badge badge-secondary">00:00</span>
                 </p>
                 <p>
@@ -129,7 +125,8 @@
                     <input type="radio" name="options" value="24" autocomplete="off"> 24 Hours
                   </label>
                 </div>
-                <input id="room3" checked data-toggle="toggle" type="checkbox" data-on="ON" data-off="OFF" data-onstyle="danger" data-offstyle="light">
+                | Switch <input id="room3" checked data-toggle="toggle" type="checkbox" data-on="ON" data-off="OFF" data-onstyle="danger" data-offstyle="light">
+                | Status <input id="room3status" checked data-toggle="toggle" data-size="small" type="checkbox" data-on="Open" data-off="Close" data-onstyle="success" data-offstyle="light">
                 <span id="timer3" class="badge badge-secondary">00:00</span>
                 </p>
               </div>
@@ -253,28 +250,40 @@
         case "room/1/status" :
           //console.log(message.payloadString);
           if (message.payloadString == "OFF") {
-            $('#room1').bootstrapToggle('off');
+            $('#room1status').bootstrapToggle('enable');
+            $('#room1status').bootstrapToggle('off');
+            $('#room1status').bootstrapToggle('disable');
           }
           else if (message.payloadString == "ON") {
-            $('#room1').bootstrapToggle('on');
+            $('#room1status').bootstrapToggle('enable');
+            $('#room1status').bootstrapToggle('on');
+            $('#room1status').bootstrapToggle('disable');
           }
           break;
         case "room/2/status" :
           //console.log(message.payloadString);
           if (message.payloadString == "OFF") {
-            $('#room2').bootstrapToggle('off');
+            $('#room2status').bootstrapToggle('enable');
+            $('#room2status').bootstrapToggle('off');
+            $('#room2status').bootstrapToggle('disable');
           }
           else if (message.payloadString == "ON") {
-            $('#room2').bootstrapToggle('on');
+            $('#room2status').bootstrapToggle('enable');
+            $('#room2status').bootstrapToggle('on');
+            $('#room2status').bootstrapToggle('disable');
           }
           break;
         case "room/3/status" :
           //console.log(message.payloadString);
           if (message.payloadString == "OFF") {
-            $('#room3').bootstrapToggle('off');
+            $('#room3status').bootstrapToggle('enable');
+            $('#room3status').bootstrapToggle('off');
+            $('#room3status').bootstrapToggle('disable');
           }
           else if (message.payloadString == "ON") {
-            $('#room3').bootstrapToggle('on');
+            $('#room3status').bootstrapToggle('enable');
+            $('#room3status').bootstrapToggle('on');
+            $('#room3status').bootstrapToggle('disable');
           }
           break;
       }
@@ -286,36 +295,74 @@
     // document.getElementById('timer3').innerHTML = "99:99"
   </script>
   <script>
+    var roomnumber;
+    var roomtimer;
 
     $(function() {
+      var d = new Date();
+      var starttime = Math.round(d.getTime() / 1000);
+      var stoptime = Math.round(d.getTime() / 1000);
+      var currenttime = Math.round(d.getTime() / 1000);
+
       $('#room3').bootstrapToggle('off');
       $('#room2').bootstrapToggle('off');
       $('#room1').bootstrapToggle('off');
+
+      $('#room3status').bootstrapToggle('off');
+      $('#room2status').bootstrapToggle('off');
+      $('#room1status').bootstrapToggle('off');
+      $('#room3status').bootstrapToggle('disable');
+      $('#room2status').bootstrapToggle('disable');
+      $('#room1status').bootstrapToggle('disable');
+
       console.log($("#1 .active input").prop('value'));
       console.log($("#2 .active input").prop('value'));
       console.log($("#3 .active input").prop('value'));
 
       $('#room1, #room2, #room3').change(function(e) {
         // $('#console-event').html('Toggle: ' + $(this).prop('checked'))
+        switch(e.currentTarget.id) {
+          case "room3" :
+            roomnumber = 3;
+            roomtimer = $("#3 .active input").prop('value')
+            console.log(roomnumber + " : " + roomtimer);
+            break;
+          case "room2" :
+            roomnumber = 2;
+            roomtimer = $("#2 .active input").prop('value')
+            console.log(roomnumber + " : " + roomtimer);
+
+            break;
+          case "room1" :
+            roomnumber = 1;
+            roomtimer = $("#1 .active input").prop('value')
+            console.log(roomnumber + " : " + roomtimer);
+            break;
+        }
         if ($(this).prop('checked')) {
           console.log(e.currentTarget.id+" : ON");
+          doSend("room/" + roomnumber.toString(), "1", false);
+          doSend("room/" + roomnumber.toString() + "/status", "ON", true);
+          starttime = Math.round(d.getTime() / 1000);
+          stoptime = starttime + (roomtimer * 10);
+          currenttime = Math.round(d.getTime() / 1000);
+          doSend("room/" + roomnumber.toString() + "/start", starttime.toString(), true);
+          doSend("room/" + roomnumber.toString() + "/stop", stoptime.toString(), true);
+          doSend("room/currenttime", currenttime.toString(), true);
+
           //console.log("ON room number : " + roomoption + " hour : " + roomhour);
         }
         else {
           console.log(e.currentTarget.id+" : OFF");
+          doSend("room/" + roomnumber.toString(), "0", false);
+          doSend("room/" + roomnumber.toString() + "/status", "OFF", true);
+          currenttime = Math.round(d.getTime() / 1000);
+          doSend("room/" + roomnumber.toString() + "/start", "0", true);
+          doSend("room/" + roomnumber.toString() + "/stop", "0", true);
+          doSend("room/currenttime", currenttime.toString(), true);
           //console.log("OFF room number : " + roomoption + " hour : " + roomhour);
         }
-        switch(e.currentTarget.id) {
-          case "room3" :
-            console.log($("#3 .active input").prop('value'));
-            break;
-          case "room2" :
-            console.log($("#2 .active input").prop('value'));
-            break;
-          case "room1" :
-            console.log($("#1 .active input").prop('value'));
-            break;
-        }
+
 
         //console.log($('.btn-group > .btn.active').text());
         //console.log($("div#1 input[name=options]:checked, div#2 input[name=options]:checked, div#3 input[name=options]:checked").val());
@@ -326,11 +373,25 @@
       })
     })
 
-    function checkhour() {
-      $("div#1 input[name=options]:checked").val(function() {
-        console.log($(this).val());
-      })
+    function doSend(topic, payload, retain) {
+      console.log(topic + " " + payload + " " + retain);
+      var message = new Paho.MQTT.Message(payload);
+      message.destinationName = topic;
+      message.qos = 0;
+      if (retain) {
+        message.retain = true;
+      }
+      else {
+        message.retain = false;
+      }
+      client.send(message);
     }
+
+    //function checkhour() {
+    //  $("div#1 input[name=options]:checked").val(function() {
+    //    console.log($(this).val());
+    //  })
+    //}
 
 
 
@@ -357,8 +418,8 @@
       //console.log(roomhour);
 
     })
-    function setroom(roomnumber, hour) {
-      console.log("room number : " + roomnumber + " hour : " + hour);
+    function setroom(room_number, hour) {
+      console.log("room number : " + room_number + " hour : " + hour);
     }
 
 
