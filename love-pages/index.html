@@ -87,7 +87,7 @@
                 </div>
                 | Switch <input id="room1" checked data-toggle="toggle" type="checkbox" data-on="ON" data-off="OFF" data-onstyle="danger" data-offstyle="light">
                 | Status <input id="room1status" checked data-toggle="toggle" data-size="small" type="checkbox" data-on="Open" data-off="Close" data-onstyle="success" data-offstyle="light">
-                <span id="timer1" class="badge badge-secondary">00:00</span>
+                <span id="timer1" class="badge badge-secondary">00:00:00</span>
               </p>
                 <p>
                   Room 02
@@ -107,7 +107,7 @@
                 </div>
                 | Switch <input id="room2" checked data-toggle="toggle" type="checkbox" data-on="ON" data-off="OFF" data-onstyle="danger" data-offstyle="light">
                 | Status <input id="room2status" checked data-toggle="toggle" data-size="small" type="checkbox" data-on="Open" data-off="Close" data-onstyle="success" data-offstyle="light">
-                <span id="timer2" class="badge badge-secondary">00:00</span>
+                <span id="timer2" class="badge badge-secondary">00:00:00</span>
                 </p>
                 <p>
                 Room 03
@@ -127,7 +127,7 @@
                 </div>
                 | Switch <input id="room3" checked data-toggle="toggle" type="checkbox" data-on="ON" data-off="OFF" data-onstyle="danger" data-offstyle="light">
                 | Status <input id="room3status" checked data-toggle="toggle" data-size="small" type="checkbox" data-on="Open" data-off="Close" data-onstyle="success" data-offstyle="light">
-                <span id="timer3" class="badge badge-secondary">00:00</span>
+                <span id="timer3" class="badge badge-secondary">00:00:00</span>
                 </p>
               </div>
 
@@ -310,7 +310,7 @@
     var roomnumber;
     var roomtimer;
     var offstate = true;
-    const TIMEFACTOR = 10;
+    const TIMEFACTOR = 3600;
 
 
     $(function() {
@@ -401,18 +401,40 @@
       })
     })
 
+    String.prototype.toHHMMSS = function () {
+      var sec_num = parseInt(this, 10); // don't forget the second param
+      var hours   = Math.floor(sec_num / 3600);
+      var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+      var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+      if (hours   < 10) {hours   = "0"+hours;}
+      if (minutes < 10) {minutes = "0"+minutes;}
+      if (seconds < 10) {seconds = "0"+seconds;}
+      return hours+':'+minutes+':'+seconds;
+    }
+
     function countdown(countdowntimer, roomnumber) {
 
       var timer = new Timer({
         tick : 1,
         ontick : function (msec) {
             console.log('timer'+roomnumber+' interval', Math.round(msec/1000) );
+            document.getElementById('timer'+roomnumber.toString()).innerHTML = Math.round(msec/1000).toString().toHHMMSS();
             //console.log(timer.getDuration());
             //console.log('timer'+roomnumber);
         },
         onstart : function() {
             console.log('room number '+roomnumber+' : timer started');
+        },
+        onstop  : function() {
+          console.log('timer stop')
+          document.getElementById('timer'+roomnumber.toString()).innerHTML = '00:00:00';
+        },
+        onend  : function() {
+          console.log('timer stop')
+          document.getElementById('timer'+roomnumber.toString()).innerHTML = '00:00:00';
         }
+
       });
       timer.start(countdowntimer * TIMEFACTOR);
       return timer;
