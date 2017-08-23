@@ -310,14 +310,11 @@
     var roomnumber;
     var roomtimer;
     var offstate = true;
+    const TIMEFACTOR = 10;
+
 
     $(function() {
-      var d = new Date();
-      var starttime = Math.round(d.getTime() / 1000);
-      var stoptime = Math.round(d.getTime() / 1000);
-      var currenttime = Math.round(d.getTime() / 1000);
-
-
+      var timeOuts = new Array();
 
       $('#room3').bootstrapToggle('off');
       $('#room2').bootstrapToggle('off');
@@ -336,35 +333,44 @@
 
       $('#room1, #room2, #room3').change(function(e) {
         // $('#console-event').html('Toggle: ' + $(this).prop('checked'))
-        switch(e.currentTarget.id) {
-          case "room3" :
-            roomnumber = 3;
-            roomtimer = $("#3 .active input").prop('value')
-            console.log("room : " + roomnumber + " : " + roomtimer);
-            break;
-          case "room2" :
-            roomnumber = 2;
-            roomtimer = $("#2 .active input").prop('value')
-            console.log("room : " + roomnumber + " : " + roomtimer);
+        var d = new Date();
+        var starttime = Math.round(d.getTime() / 1000);
+        var stoptime = Math.round(d.getTime() / 1000);
+        var currenttime = Math.round(d.getTime() / 1000);
 
-            break;
-          case "room1" :
-            roomnumber = 1;
-            roomtimer = $("#1 .active input").prop('value')
-            console.log("room : " + roomnumber + " : " + roomtimer);
-            break;
-        }
         if (offstate) {
+          switch(e.currentTarget.id) {
+            case "room3" :
+              roomnumber = 3;
+              roomtimer = $("#3 .active input").prop('value')
+              console.log("room : " + roomnumber + " : " + roomtimer);
+              break;
+            case "room2" :
+              roomnumber = 2;
+              roomtimer = $("#2 .active input").prop('value')
+              console.log("room : " + roomnumber + " : " + roomtimer);
+
+              break;
+            case "room1" :
+              roomnumber = 1;
+              roomtimer = $("#1 .active input").prop('value')
+              console.log("room : " + roomnumber + " : " + roomtimer);
+              break;
+          }
+
           if ($(this).prop('checked')) {
             console.log(e.currentTarget.id+" : ON");
             //doSend("room/" + roomnumber.toString(), "1", false);
             //doSend("room/" + roomnumber.toString() + "/status", "ON", true);
             starttime = Math.round(d.getTime() / 1000);
-            stoptime = starttime + (roomtimer * 10);
+            stoptime = starttime + (roomtimer * TIMEFACTOR);
             currenttime = Math.round(d.getTime() / 1000);
             doSend("room/" + roomnumber.toString() + "/start", starttime.toString(), true);
             doSend("room/" + roomnumber.toString() + "/stop", stoptime.toString(), true);
             doSend("room/currenttime", currenttime.toString(), true);
+
+            timeOuts[e.currentTarget.id] = countdown(roomtimer, roomnumber);
+            console.log(timeOuts[e.currentTarget.id]);
 
             //console.log("ON room number : " + roomoption + " hour : " + roomhour);
           }
@@ -376,6 +382,10 @@
             //doSend("room/" + roomnumber.toString() + "/start", "0", true);
             //doSend("room/" + roomnumber.toString() + "/stop", "0", true);
             doSend("room/currenttime", currenttime.toString(), true);
+
+            if(e.currentTarget.id in timeOuts) {
+              timeOuts[e.currentTarget.id].stop();
+            }
             //console.log("OFF room number : " + roomoption + " hour : " + roomhour);
           }
         }
@@ -390,6 +400,23 @@
 
       })
     })
+
+    function countdown(countdowntimer, roomnumber) {
+
+      var timer = new Timer({
+        tick : 1,
+        ontick : function (msec) {
+            console.log('timer'+roomnumber+' interval', Math.round(msec/1000) );
+            //console.log(timer.getDuration());
+            //console.log('timer'+roomnumber);
+        },
+        onstart : function() {
+            console.log('room number '+roomnumber+' : timer started');
+        }
+      });
+      timer.start(countdowntimer * TIMEFACTOR);
+      return timer;
+    }
 
     function doSend(topic, payload, retain) {
       console.log(topic + " " + payload + " " + retain);
