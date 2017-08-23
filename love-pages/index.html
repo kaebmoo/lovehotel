@@ -426,8 +426,8 @@
             doSend("room/" + roomnumber.toString(), "0", false);
             //doSend("room/" + roomnumber.toString() + "/status", "OFF", true);
             currenttime = Math.round(d.getTime() / 1000);
-            //doSend("room/" + roomnumber.toString() + "/start", "0", true);
-            //doSend("room/" + roomnumber.toString() + "/stop", "0", true);
+            doSend("room/" + roomnumber.toString() + "/start", "0", true);
+            doSend("room/" + roomnumber.toString() + "/stop", "0", true);
             doSend("room/" + roomnumber.toString() + "/currenttime", currenttime.toString(), true);
 
             if(e.currentTarget.id in timeOuts) {
