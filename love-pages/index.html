@@ -203,6 +203,7 @@
     </script>
 
     <script>
+    const MAXROOM = 3;
 
     // Create a client instance: Broker, Port, Websocket Path, Client ID
     client = new Paho.MQTT.Client("192.168.9.1", Number(1884), "/ws", "lovehotelcontrol");
@@ -221,8 +222,14 @@
       console.log("onConnect");
       client.subscribe("room/+/timer");
       client.subscribe("room/+/status");
+      client.subscribe("room/+/start");
+      client.subscribe("room/+/stop");
 
-      doSend("room/currenttime", Math.round(d.getTime() / 1000).toString(), true);
+      var roomstep;
+      for (roomstep = 1; roomstep <= MAXROOM; roomstep++) {
+        doSend("room/" + roomstep.toString() + "/currenttime", Math.round(d.getTime() / 1000).toString(), true);
+      }
+
       //client.subscribe("room/2/timer");
       //client.subscribe("room/3/timer");
       // message = new Paho.MQTT.Message("Hello");
@@ -239,8 +246,39 @@
 
     // called when a message arrives
     function onMessageArrived(message) {
-      console.log("onMessageArrived:"+message.payloadString);
+      var d = new Date();
+      var lefttimer;
+
+      console.log("onMessageArrived:" + message.topic + " " + message.payloadString);
       switch (message.destinationName) {
+        case "room/3/stop" :
+          console.log("time left: " + (parseInt(message.payloadString, 10) - Math.round(d.getTime() / 1000)) );
+          lefttimer = (parseInt(message.payloadString, 10) - Math.round(d.getTime() / 1000))/TIMEFACTOR;
+          //console.log("room number: " + roomnumber);
+          //console.log("room option: " + roomoption);
+          if($('#room3status').prop('checked')) {
+            timeOuts["room3"] = countdown(lefttimer, 3);
+          }
+
+          break;
+        case "room/2/stop" :
+          console.log("time left: " + (parseInt(message.payloadString, 10) - Math.round(d.getTime() / 1000)) );
+          lefttimer = (parseInt(message.payloadString, 10) - Math.round(d.getTime() / 1000))/TIMEFACTOR;
+          //console.log("room number: " + roomnumber);
+          //console.log("room option: " + roomoption);
+          if($('#room2status').prop('checked')) {
+            timeOuts["room2"] = countdown(lefttimer, 2);
+          }
+          break;
+        case "room/1/stop" :
+          console.log("time left: " + (parseInt(message.payloadString, 10) - Math.round(d.getTime() / 1000)) );
+          lefttimer = (parseInt(message.payloadString, 10) - Math.round(d.getTime() / 1000))/TIMEFACTOR;
+          //console.log("room number: " + roomnumber);
+          //console.log("room option: " + roomoption);
+          if($('#room1status').prop('checked')) {
+            timeOuts["room1"] = countdown(lefttimer, 1);
+          }
+          break;
         case "room/1/timer" :
           document.getElementById('timer1').innerHTML = message.payloadString;
           break;
@@ -264,6 +302,9 @@
             $('#room1status').bootstrapToggle('enable');
             $('#room1status').bootstrapToggle('on');
             $('#room1status').bootstrapToggle('disable');
+            offstate = false;
+            $('#room1').bootstrapToggle('on');
+            offstate = true;
           }
           break;
         case "room/2/status" :
@@ -280,9 +321,12 @@
             $('#room2status').bootstrapToggle('enable');
             $('#room2status').bootstrapToggle('on');
             $('#room2status').bootstrapToggle('disable');
+            offstate = false;
+            $('#room2').bootstrapToggle('on');
+            offstate = true;
           }
           break;
-        case "room/3/status" :
+        case "room3status" :
           //console.log(message.payloadString);
           if (message.payloadString == "OFF") {
             $('#room3status').bootstrapToggle('enable');
@@ -296,6 +340,9 @@
             $('#room3status').bootstrapToggle('enable');
             $('#room3status').bootstrapToggle('on');
             $('#room3status').bootstrapToggle('disable');
+            offstate = false;
+            $('#room3').bootstrapToggle('on');
+            offstate = true;
           }
           break;
       }
@@ -311,10 +358,10 @@
     var roomtimer;
     var offstate = true;
     const TIMEFACTOR = 3600;
-
+    var timeOuts = new Array();
 
     $(function() {
-      var timeOuts = new Array();
+
 
       $('#room3').bootstrapToggle('off');
       $('#room2').bootstrapToggle('off');
@@ -367,7 +414,7 @@
             currenttime = Math.round(d.getTime() / 1000);
             doSend("room/" + roomnumber.toString() + "/start", starttime.toString(), true);
             doSend("room/" + roomnumber.toString() + "/stop", stoptime.toString(), true);
-            doSend("room/currenttime", currenttime.toString(), true);
+            doSend("room/" + roomnumber.toString() + "/currenttime", currenttime.toString(), true);
 
             timeOuts[e.currentTarget.id] = countdown(roomtimer, roomnumber);
             console.log(timeOuts[e.currentTarget.id]);
@@ -381,7 +428,7 @@
             currenttime = Math.round(d.getTime() / 1000);
             //doSend("room/" + roomnumber.toString() + "/start", "0", true);
             //doSend("room/" + roomnumber.toString() + "/stop", "0", true);
-            doSend("room/currenttime", currenttime.toString(), true);
+            doSend("room/" + roomnumber.toString() + "/currenttime", currenttime.toString(), true);
 
             if(e.currentTarget.id in timeOuts) {
               timeOuts[e.currentTarget.id].stop();
@@ -441,15 +488,15 @@
     }
 
     function doSend(topic, payload, retain) {
-      console.log(topic + " " + payload + " " + retain);
+      console.log("Send: " + topic + " " + payload + " " + retain);
       var message = new Paho.MQTT.Message(payload);
       message.destinationName = topic;
       message.qos = 0;
       if (retain) {
-        message.retain = true;
+        message.retained = true;
       }
       else {
-        message.retain = false;
+        message.retained = false;
       }
       client.send(message);
     }
