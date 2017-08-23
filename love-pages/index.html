@@ -78,11 +78,11 @@
                   <label class="btn btn-outline-secondary ">
                     <input type="radio" name="options" value="2" autocomplete="off" > 2 Hours
                   </label>
-                  <label class="btn btn-outline-secondary">
-                    <input type="radio" name="options" value="3" autocomplete="off"> 3 Hours
-                  </label>
                   <label class="btn btn-outline-secondary active">
-                    <input type="radio" name="options" value="24" autocomplete="off" checked> 24 Hours
+                    <input type="radio" name="options" value="3" autocomplete="off" checked> 3 Hours
+                  </label>
+                  <label class="btn btn-outline-secondary ">
+                    <input type="radio" name="options" value="24" autocomplete="off" > 24 Hours
                   </label>
                 </div>
                 | Switch <input id="room1" checked data-toggle="toggle" type="checkbox" data-on="ON" data-off="OFF" data-onstyle="danger" data-offstyle="light">
@@ -92,14 +92,14 @@
                 <p>
                   Room 02
                 <div id="2" class="btn-group px-1" data-toggle="buttons">
-                  <label class="btn btn-outline-secondary active">
-                    <input type="radio" name="options" value="1" autocomplete="off" checked> 1 Hour
+                  <label class="btn btn-outline-secondary ">
+                    <input type="radio" name="options" value="1" autocomplete="off" > 1 Hour
                   </label>
                   <label class="btn btn-outline-secondary ">
                     <input type="radio" name="options" value="2" autocomplete="off" > 2 Hours
                   </label>
-                  <label class="btn btn-outline-secondary">
-                    <input type="radio" name="options" value="3" autocomplete="off"> 3 Hours
+                  <label class="btn btn-outline-secondary active">
+                    <input type="radio" name="options" value="3" autocomplete="off" checked> 3 Hours
                   </label>
                   <label class="btn btn-outline-secondary">
                     <input type="radio" name="options" value="24" autocomplete="off"> 24 Hours
@@ -205,7 +205,7 @@
     <script>
 
     // Create a client instance: Broker, Port, Websocket Path, Client ID
-    client = new Paho.MQTT.Client("localhost", Number(1884), "/ws", "lovehotelcontrol");
+    client = new Paho.MQTT.Client("192.168.9.1", Number(1884), "/ws", "lovehotelcontrol");
 
     // set callback handlers
     client.onConnectionLost = onConnectionLost;
@@ -216,10 +216,13 @@
 
     // called when the client connects
     function onConnect() {
+      var d = new Date();
       // Once a connection has been made, make a subscription and send a message.
       console.log("onConnect");
       client.subscribe("room/+/timer");
       client.subscribe("room/+/status");
+
+      doSend("room/currenttime", Math.round(d.getTime() / 1000).toString(), true);
       //client.subscribe("room/2/timer");
       //client.subscribe("room/3/timer");
       // message = new Paho.MQTT.Message("Hello");
@@ -253,6 +256,9 @@
             $('#room1status').bootstrapToggle('enable');
             $('#room1status').bootstrapToggle('off');
             $('#room1status').bootstrapToggle('disable');
+            offstate = false;
+            $('#room1').bootstrapToggle('off');
+            offstate = true;
           }
           else if (message.payloadString == "ON") {
             $('#room1status').bootstrapToggle('enable');
@@ -266,6 +272,9 @@
             $('#room2status').bootstrapToggle('enable');
             $('#room2status').bootstrapToggle('off');
             $('#room2status').bootstrapToggle('disable');
+            offstate = false;
+            $('#room2').bootstrapToggle('off');
+            offstate = true;
           }
           else if (message.payloadString == "ON") {
             $('#room2status').bootstrapToggle('enable');
@@ -279,6 +288,9 @@
             $('#room3status').bootstrapToggle('enable');
             $('#room3status').bootstrapToggle('off');
             $('#room3status').bootstrapToggle('disable');
+            offstate = false;
+            $('#room3').bootstrapToggle('off');
+            offstate = true;
           }
           else if (message.payloadString == "ON") {
             $('#room3status').bootstrapToggle('enable');
@@ -297,12 +309,15 @@
   <script>
     var roomnumber;
     var roomtimer;
+    var offstate = true;
 
     $(function() {
       var d = new Date();
       var starttime = Math.round(d.getTime() / 1000);
       var stoptime = Math.round(d.getTime() / 1000);
       var currenttime = Math.round(d.getTime() / 1000);
+
+
 
       $('#room3').bootstrapToggle('off');
       $('#room2').bootstrapToggle('off');
@@ -325,43 +340,46 @@
           case "room3" :
             roomnumber = 3;
             roomtimer = $("#3 .active input").prop('value')
-            console.log(roomnumber + " : " + roomtimer);
+            console.log("room : " + roomnumber + " : " + roomtimer);
             break;
           case "room2" :
             roomnumber = 2;
             roomtimer = $("#2 .active input").prop('value')
-            console.log(roomnumber + " : " + roomtimer);
+            console.log("room : " + roomnumber + " : " + roomtimer);
 
             break;
           case "room1" :
             roomnumber = 1;
             roomtimer = $("#1 .active input").prop('value')
-            console.log(roomnumber + " : " + roomtimer);
+            console.log("room : " + roomnumber + " : " + roomtimer);
             break;
         }
-        if ($(this).prop('checked')) {
-          console.log(e.currentTarget.id+" : ON");
-          doSend("room/" + roomnumber.toString(), "1", false);
-          doSend("room/" + roomnumber.toString() + "/status", "ON", true);
-          starttime = Math.round(d.getTime() / 1000);
-          stoptime = starttime + (roomtimer * 10);
-          currenttime = Math.round(d.getTime() / 1000);
-          doSend("room/" + roomnumber.toString() + "/start", starttime.toString(), true);
-          doSend("room/" + roomnumber.toString() + "/stop", stoptime.toString(), true);
-          doSend("room/currenttime", currenttime.toString(), true);
+        if (offstate) {
+          if ($(this).prop('checked')) {
+            console.log(e.currentTarget.id+" : ON");
+            //doSend("room/" + roomnumber.toString(), "1", false);
+            //doSend("room/" + roomnumber.toString() + "/status", "ON", true);
+            starttime = Math.round(d.getTime() / 1000);
+            stoptime = starttime + (roomtimer * 10);
+            currenttime = Math.round(d.getTime() / 1000);
+            doSend("room/" + roomnumber.toString() + "/start", starttime.toString(), true);
+            doSend("room/" + roomnumber.toString() + "/stop", stoptime.toString(), true);
+            doSend("room/currenttime", currenttime.toString(), true);
 
-          //console.log("ON room number : " + roomoption + " hour : " + roomhour);
+            //console.log("ON room number : " + roomoption + " hour : " + roomhour);
+          }
+          else {
+            console.log(e.currentTarget.id+" : OFF");
+            doSend("room/" + roomnumber.toString(), "0", false);
+            //doSend("room/" + roomnumber.toString() + "/status", "OFF", true);
+            currenttime = Math.round(d.getTime() / 1000);
+            //doSend("room/" + roomnumber.toString() + "/start", "0", true);
+            //doSend("room/" + roomnumber.toString() + "/stop", "0", true);
+            doSend("room/currenttime", currenttime.toString(), true);
+            //console.log("OFF room number : " + roomoption + " hour : " + roomhour);
+          }
         }
-        else {
-          console.log(e.currentTarget.id+" : OFF");
-          doSend("room/" + roomnumber.toString(), "0", false);
-          doSend("room/" + roomnumber.toString() + "/status", "OFF", true);
-          currenttime = Math.round(d.getTime() / 1000);
-          doSend("room/" + roomnumber.toString() + "/start", "0", true);
-          doSend("room/" + roomnumber.toString() + "/stop", "0", true);
-          doSend("room/currenttime", currenttime.toString(), true);
-          //console.log("OFF room number : " + roomoption + " hour : " + roomhour);
-        }
+
 
 
         //console.log($('.btn-group > .btn.active').text());

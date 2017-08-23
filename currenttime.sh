@@ -1,5 +1,6 @@
 #!/bin/bash
-HOST="localhost"
+HOST="192.168.9.1"
+#HOST="localhost"
 while true
 do
   currenttime=$(date +%s)

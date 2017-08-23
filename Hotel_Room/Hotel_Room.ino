@@ -35,19 +35,20 @@ SOFTWARE.
 
 // You should get Auth Token in the Blynk App.
 // Go to the Project Settings (nut icon).
-char auth[] = "27092c0fc50343bc917a97c755012c9b";
+
 
 // const char *ssid = "CAT-Mobile";
-const char *ssid = "rawpooh";
-const char *password = "59860421";
+const char *ssid = "CAT-Event-Register";
+const char *password = "";
 //const char* mqtt_server = "192.168.43.252";
-const char* mqtt_server = "192.168.0.16";
+const char* mqtt_server = "192.168.9.1";
+//const char* mqtt_server = "192.168.8.50";
 const int relayPin = D1;
 const int buzzer=D5; //Buzzer control port, default D5
 const int MAXRETRY=4; // 0 - 4 
 
 byte mac[6] { 0x60, 0x01, 0x94, 0x82, 0x85, 0x54};
-IPAddress ip(192, 168, 9, 201);
+IPAddress ip(192, 168, 9, 101);
 IPAddress gateway(192, 168, 9, 1);
 IPAddress subnet(255, 255, 255, 0);
 IPAddress server(192, 168, 9, 1);
@@ -55,18 +56,18 @@ IPAddress server(192, 168, 9, 1);
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-char *myRoom = "room/2";
+char *myRoom = "room/1";
 char *mqtt_user = "chang";
 char *mqtt_password = "chang";
-char *room_status = "room/2/status";
-char *room_start = "room/2/start";
-char *room_stop = "room/2/stop";
+char *room_status = "room/1/status";
+char *room_start = "room/1/start";
+char *room_stop = "room/1/stop";
 char *room_currenttime = "room/currenttime";
 
 int mqtt_reconnect = 0;
 int wifi_reconnect = 0;
 // int flagtime = 0;
-boolean on = false;
+boolean ON = false;
 boolean bstart = false;
 boolean bstop = false;
 boolean bcurrent = false;
@@ -113,20 +114,26 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.println();
 
   if(strcmp(topic, myRoom) == 0) {
-    // Switch on the LED if an 1 was received as first character
+    
+    // Switch on the RELAY if an 1 was received as first character
     if ((char)payload[0] == '1') {      
       relay(true);
-      force = true;
+      // force to open ; do not check start time, stop time
+      force = true; 
+      bstart = false;
+      bstop = false;
 
     } else if ((char)payload[0] == '0') {
-      
+      // force to close ; do not check start time, stop time
       relay(false);
-      force = false;
+      force = true;
+      bstart = false;
+      bstop = false;
       
     }
   }
   if (strcmp(topic, room_start) == 0) {
-    
+    // receive start time message    
     for(i = 0; i < length; i++) {
       strStart += (char)payload[i];
     }
@@ -135,11 +142,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
     strStart = "";
     
     bstart = true;
- 
-    
   }
   if (strcmp(topic, room_stop) == 0) {
-    
+    // receive stop time message
     for(i = 0; i < length; i++) {
       strStop += (char)payload[i];
     }  
@@ -148,8 +153,13 @@ void callback(char* topic, byte* payload, unsigned int length) {
     
     bstop = true;
   }
+
+  if (bstart && bstop) {
+    force = false; 
+  }
+  
   if (strcmp(topic, room_currenttime) == 0) {
-    
+    //receive current time message
     for(i = 0; i < length; i++) {
       strCurrenttime += (char)payload[i];
     }
@@ -186,7 +196,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 void relay(boolean set)
 {
   if (set) {
-    on = true;
+    ON = true;
     digitalWrite(relayPin, HIGH);
     digitalWrite(BUILTIN_LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
     // but actually the LED is on; this is because
@@ -199,7 +209,8 @@ void relay(boolean set)
     
   }
   else {
-    on = false;
+    ON = false;
+    
     digitalWrite(relayPin, LOW);
     digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
     client.publish(room_status,"OFF", true);
@@ -222,7 +233,7 @@ void setup_wifi() {
   Serial.print("Connecting to ");
   Serial.println(ssid);
   
-  // WiFi.config(ip,gateway,subnet);  // fix ip address
+  //WiFi.config(ip,gateway,subnet);  // fix ip address
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
@@ -266,9 +277,12 @@ void reconnect() {
     Serial.print("Attempting MQTT connection...");
     // Attempt to connect
     if (client.connect(myRoom, mqtt_user, mqtt_password)) {
-      Serial.println("connected");
+      Serial.print("connected : ");
+      Serial.println(mqtt_server);
+      
       // Once connected, publish an announcement...
       client.publish(room_status, "hello world");
+      
       // ... and resubscribe
       client.subscribe(myRoom);
       client.subscribe(room_start);
@@ -323,6 +337,8 @@ void checkvalidtime()
     Serial.print(" ");
     Serial.print(bcurrent);
     Serial.print(" ");
+    Serial.print(force);
+    Serial.print(" ");
     Serial.print(starttime);
     Serial.print(" ");
     Serial.print(stoptime);
@@ -336,11 +352,11 @@ void checkvalidtime()
     
     if (bstart && bstop && bcurrent && !force) {
       if ( (currenttime >= starttime) && (currenttime <= stoptime) ) {
-        if (!on) {
+        if (!ON) {
           relay(true);  
         }
       }
-      else if (on) {
+      else if (ON) {
         relay(false);
       }
     }
@@ -374,8 +390,8 @@ void setup() {
 
   delay(500);
 
-  Blynk.config(auth);  // in place of Blynk.begin(auth, ssid, pass);
-  Blynk.connect(3333);  // timeout set to 10 seconds and then continue without Blynk, 3333 is 10 seconds because Blynk.connect is in 3ms units.
+  //Blynk.config(auth);  // in place of Blynk.begin(auth, ssid, pass);
+  //Blynk.connect(3333);  // timeout set to 10 seconds and then continue without Blynk, 3333 is 10 seconds because Blynk.connect is in 3ms units.
 
   //pinMode(BUILTIN_LED, OUTPUT);
   buzzer_sound();
@@ -385,7 +401,7 @@ void setup() {
   delay(200);
 
   time_t t = now();
-  Serial.print("Second : ");
+  Serial.print("start : ");
   Serial.print(second(t));
   Serial.println();
 }
@@ -403,7 +419,7 @@ void loop() {
   }
 
   client.loop();
-  Blynk.run();
+  //Blynk.run();
   
   //t_settime.update();
   currenttime = (unsigned long) now();
