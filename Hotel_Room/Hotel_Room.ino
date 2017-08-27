@@ -38,7 +38,7 @@ SOFTWARE.
 
 
 // const char *ssid = "CAT-Mobile";
-const char *ssid = "CAT-Event-Register";
+const char *ssid = "CAT-Register";
 const char *password = "";
 //const char* mqtt_server = "192.168.43.252";
 const char* mqtt_server = "192.168.9.1";
@@ -377,6 +377,8 @@ void setup() {
   pinMode(buzzer, OUTPUT);
   // t_settime.every(5000, takeSettingTime);
 
+  Serial.println(myRoom);
+  
   setup_wifi();
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
