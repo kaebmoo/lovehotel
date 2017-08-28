@@ -44,8 +44,13 @@ const char *password = "";
 const char* mqtt_server = "192.168.9.1";
 //const char* mqtt_server = "192.168.8.50";
 const int relayPin = D1;
+const int statusPin = D2;
 const int buzzer=D5; //Buzzer control port, default D5
-const int MAXRETRY=4; // 0 - 4 
+const long interval = 1000;
+int ledState = LOW;
+unsigned long previousMillis = 0;
+
+const int MAXRETRY=4; // 0 - 4
 
 byte mac[6] { 0x60, 0x01, 0x94, 0x82, 0x85, 0x54};
 IPAddress ip(192, 168, 9, 101);
@@ -56,13 +61,14 @@ IPAddress server(192, 168, 9, 1);
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-char *myRoom = "room/1";
 char *mqtt_user = "chang";
 char *mqtt_password = "chang";
-char *room_status = "room/1/status";
-char *room_start = "room/1/start";
-char *room_stop = "room/1/stop";
-char *room_currenttime = "room/1/currenttime";
+
+char *myRoom = "room/2";
+char *room_status = "room/2/status";
+char *room_start = "room/2/start";
+char *room_stop = "room/2/stop";
+char *room_currenttime = "room/2/currenttime";
 
 int mqtt_reconnect = 0;
 int wifi_reconnect = 0;
@@ -98,12 +104,13 @@ void buzzer_sound()
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {
- 
+
   String strStart = "";
   String strStop = "";
   String strCurrenttime = "";
-  
+
   int i;
+  int statusvalue;
 
   Serial.print("Message arrived [");
   Serial.print(topic);
@@ -114,50 +121,59 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.println();
 
   if(strcmp(topic, myRoom) == 0) {
-    
+
     // Switch on the RELAY if an 1 was received as first character
-    if ((char)payload[0] == '1') {      
+    if ((char)payload[0] == '1') {
       relay(true);
       // force to open ; do not check start time, stop time
-      force = true; 
+      force = true;
       bstart = false;
       bstop = false;
 
-    } else if ((char)payload[0] == '0') {
+    } else if ((char)payload[0] == '0') {       // 0 - turn relay off
       // force to close ; do not check start time, stop time
       relay(false);
       force = true;
       bstart = false;
       bstop = false;
+
+    } else if ((char)payload[0] == '2') {       // 2 - get status from D2 (connect D2 <---> D1) 
+        statusvalue = digitalRead(statusPin);
+        if (statusvalue == HIGH) {
+          client.publish(room_status, "ON");
+      }
+        else {
+          client.publish(room_status, "OFF");
+        }
       
     }
   }
   if (strcmp(topic, room_start) == 0) {
-    // receive start time message    
+    // receive start time message
     for(i = 0; i < length; i++) {
       strStart += (char)payload[i];
     }
 
     starttime = strStart.toInt();
     strStart = "";
-    
+
     bstart = true;
   }
   if (strcmp(topic, room_stop) == 0) {
     // receive stop time message
     for(i = 0; i < length; i++) {
       strStop += (char)payload[i];
-    }  
+    }
     stoptime = strStop.toInt();
     strStop = "";
-    
+
     bstop = true;
   }
 
   if (bstart && bstop) {
-    force = false; 
+    force = false;
   }
-  
+
   if (strcmp(topic, room_currenttime) == 0) {
     //receive current time message
     for(i = 0; i < length; i++) {
@@ -206,11 +222,11 @@ void relay(boolean set)
     Serial.print(room_status);
     Serial.println(" : ON");
     buzzer_sound();
-    
+
   }
   else {
     ON = false;
-    
+
     digitalWrite(relayPin, LOW);
     digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
     client.publish(room_status,"OFF", true);
@@ -221,7 +237,7 @@ void relay(boolean set)
     digitalWrite(BUILTIN_LED, LOW);
     delay(500);
     digitalWrite(BUILTIN_LED, HIGH);
-    
+
   }
 }
 
@@ -232,7 +248,7 @@ void setup_wifi() {
   Serial.println();
   Serial.print("Connecting to ");
   Serial.println(ssid);
-  
+
   //WiFi.config(ip,gateway,subnet);  // fix ip address
   WiFi.begin(ssid, password);
 
@@ -247,7 +263,7 @@ void setup_wifi() {
     }
   }
 
-  
+
 
   Serial.println("");
   Serial.println("WiFi connected");
@@ -279,10 +295,10 @@ void reconnect() {
     if (client.connect(myRoom, mqtt_user, mqtt_password)) {
       Serial.print("connected : ");
       Serial.println(mqtt_server);
-      
+
       // Once connected, publish an announcement...
       client.publish(room_status, "hello world");
-      
+
       // ... and resubscribe
       client.subscribe(myRoom);
       client.subscribe(room_start);
@@ -349,11 +365,11 @@ void checkvalidtime()
     //  setTime((time_t) starttime);
     //  bcurrent = true;
     //}
-    
+
     if (bstart && bstop && bcurrent && !force) {
       if ( (currenttime >= starttime) && (currenttime <= stoptime) ) {
         if (!ON) {
-          relay(true);  
+          relay(true);
         }
       }
       else if (ON) {
@@ -362,10 +378,24 @@ void checkvalidtime()
     }
 }
 
-void takeSettingTime() 
+void takeSettingTime()
 {
   setTime((time_t) topic_currenttime);
   Serial.println("Time Set");
+}
+
+void blink()
+{
+  unsigned long currentMillis = millis();
+
+  // if enough millis have elapsed
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+
+    // toggle the LED
+    ledState = !ledState;
+    digitalWrite(BUILTIN_LED, ledState);
+  }
 }
 
 void setup() {
@@ -374,11 +404,12 @@ void setup() {
   Serial.begin(115200);
   pinMode(relayPin, OUTPUT);
   pinMode(D4, OUTPUT);
+  pinMode(statusPin, INPUT);
   pinMode(buzzer, OUTPUT);
   // t_settime.every(5000, takeSettingTime);
 
   Serial.println(myRoom);
-  
+
   setup_wifi();
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
@@ -422,9 +453,12 @@ void loop() {
 
   client.loop();
   //Blynk.run();
-  
+
   //t_settime.update();
   currenttime = (unsigned long) now();
   checkvalidtime();
+  if(!ON) {
+    blink();
+  }
 
 }

@@ -225,9 +225,11 @@
       client.subscribe("room/+/start");
       client.subscribe("room/+/stop");
 
+
       var roomstep;
       for (roomstep = 1; roomstep <= MAXROOM; roomstep++) {
         doSend("room/" + roomstep.toString() + "/currenttime", Math.round(d.getTime() / 1000).toString(), true);
+        doSend("room/" + roomstep.toString(), "2", false);
       }
 
       //client.subscribe("room/2/timer");
