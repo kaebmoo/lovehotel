@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Love Hotel - Control</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet"> -->
+    <!--
+    <link href="bootstrap-switch-3.3.4/dist/css/bootstrap3/bootstrap-switch.css" rel="stylesheet">
+    -->
+    <link href="bootstrap-toggle/css/bootstrap-toggle.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="starter-template.css" rel="stylesheet">
+
+
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/popper/popper.min.js"></script>
+    <script src="bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+    <!-- <script src="vendor/bootstrap/js/bootstrap.min.js"></script> -->
+    <script src="bootstrap-toggle/js/bootstrap-toggle.min.js"></script>
+
+    <script src="paho.javascript-1.0.3/paho-mqtt.js"></script>
+    <script src="node_modules/timer.js/dist/timer.js"></script>
+
+
+    <!-- Custom styles for this template -->
+    <style>
+    body {
+        padding-top: 54px;
+    }
+
+    @media (min-width: 992px) {
+        body {
+            padding-top: 56px;
+        }
+    }
+    .active {
+      background-color: OrangeRed !important;
+    }
+    mqttdisconnect {
+      color: red;
+    }
+    mqttconnected {
+      color: blue;
+    }
+    </style>
+
+</head>
+<!-- https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/ -->
+<script src="angular.min.js"></script>
+
+<!-- UI Bootstrap Bootstrap components written in pure AngularJS by the AngularUI Team -->
+<script src="ui-bootstrap-tpls-2.5.0.js"></script>
+
+<body ng-app="lovehotel" ng-controller="electricalController">
+  <!-- Navigation -->
+  <nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#">Love Hotel</a>
+      </div>
+      <div id="navbar" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="#">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="services.html">Services</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div><!--/.nav-collapse -->
+    </div>
+  </nav>
+  <!-- Page Content -->
+  <div class="container">
+      <div class="row">
+          <div class="col-lg-12 text-left">
+              <h1 class="mt-5">{{name}}</h1>
+              <p class="lead" id="mqttstatus">MQTT Status:</p>
+              <ul class="list-unstyled">
+                  <li></li>
+              </ul>
+          </div>
+
+          <div class="col-lg-12 text-left">
+
+
+          <h2 class="sub-header">Rooms:</h2>
+          <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Switch</th>
+              <th>Timer (Hours)</th>
+              <th>Time Left</th>
+            </thead>
+            <tbody>
+
+
+              <tr ng-repeat="item in items">
+              <td>{{item.id}}</td>
+              <td>{{item.name}}</td>
+              <td>
+                <div class="span2">
+                  <button type="button" class="btn btn-default btn-block" id="{{item.switchid}}" ng-model="item.toggle" ng-change="onButtonClick($index)" uib-btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0">
+                    {{item.toggle? "ON":"OFF"}}
+                  </button>
+                  </div>
+              </td>
+              <!-- <td align="center"><input checked data-toggle="toggle" type="checkbox" data-on="ON" data-off="OFF" data-onstyle="danger" data-offstyle="light" ng-model="item.toggle" ng-change="onItemChange($index)">{{item.toggle}}</td> -->
+              <!-- <td align="center"><input type="checkbox" ng-model="item.toggle" ng-change="onItemChange($index)">{{item.toggle}}</td> -->
+              <td><select ng-model="item.timer" ng-options="x for x in item.timer_options" ng-change="onItemChange($index)"></select></td>
+              <td><span class="badge badge-secondary" id="{{item.timerbadge}}">00:00:00</span></td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+          <p>
+            <h4>On item changes:</h4> {{debug}} {{status}}
+          </p>
+
+
+          </div>
+      </div>
+  </div>
+
+
+
+    <script type="text/javascript">
+
+
+      var setstate = false;
+
+      const TIMEFACTOR = 10;  // 3600 = 1 hour, 60 = 1 minute
+      var timeOuts = new Array(); // keep timer instance
+
+      var app = angular.module("lovehotel",['ui.bootstrap']);
+	    app.controller("electricalController", function($scope) {
+
+  	    $scope.name = "Love Hotel Electric Control";
+  		  $scope.debug = "output debug here"
+  	    $scope.items = [
+  			{ id: "room/1", name: "Room 01", pub: "", sub: "", toggle: 0, switchid: "room1", timerbadge:"timer1", timer:3, timer_options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
+  			{ id: "room/2", name: "Room 02", pub: "", sub: "", toggle: 0, switchid: "room2", timerbadge:"timer2", timer:3, timer_options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
+  			{ id: "room/3", name: "Room 03", pub: "", sub: "", toggle: 0, switchid: "room3", timerbadge:"timer3", timer:3,  timer_options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
+  			{ id: "room/4", name: "Room 04", pub: "", sub: "", toggle: 0, switchid: "room4", timerbadge:"timer4", timer:3,  timer_options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
+  			{ id: "room/5", name: "Room 05", pub: "", sub: "", toggle: 0, switchid: "room5", timerbadge:"timer5", timer:3,  timer_options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
+  	    ];
+
+        $scope.onButtonClick = function (index) {
+          var room = $scope.items[index];
+          var d = new Date();
+          var starttime;
+          var stoptime;
+          var currenttime;
+          var roomtimer;
+          roomtimer = room.timer;
+
+          $scope.debug = "ID:" + room.id + ", Name:" + room.name + ", Toggle:" + (room.toggle? "1":"0") + ", Timer:" + (room.timer);
+
+          if (!setstate) {
+            if(room.toggle) {
+              $scope.status = "ON";
+              starttime = Math.round(d.getTime() / 1000);
+              stoptime = starttime + (roomtimer * TIMEFACTOR);
+              currenttime = Math.round(d.getTime() / 1000);
+
+              messageSend(room.id+"/start", starttime.toString(), true);
+              messageSend(room.id+"/stop", stoptime.toString(), true);
+              messageSend(room.id+"/currenttime", currenttime.toString(), true);
+              timeOuts[room.timerbadge] = countdown(roomtimer, index+1);
+            }
+            else {
+              $scope.status = "OFF";
+              if(room.timerbadge in timeOuts) {
+                timeOuts[room.timerbadge].stop();
+              }
+              currenttime = Math.round(d.getTime() / 1000);
+              messageSend(room.id, "0", false);
+              messageSend(room.id+"/start", "0", true);
+              messageSend(room.id+"/stop", "0", true);
+              messageSend(room.id+"/currenttime", currenttime.toString(), true);
+
+            }
+          }
+
+        }
+
+  	    $scope.onItemChange = function (index) {
+  			   var room = $scope.items[index];
+
+  			   $scope.debug = "ID:" + room.id + ", Name:" + room.name + ", Toggle:" + (room.toggle? "1":"0") + ", Timer:" + (room.timer);
+
+  	    }
+
+	   });
+
+     // change button color
+     $("button").click(function(){
+        $("button").removeClass("active");
+        $(this).addClass("active");
+      });
+
+      // MQTT
+
+      const MAXROOM = 5;
+
+      // Create a client instance: Broker, Port, Websocket Path, Client ID
+      client = new Paho.MQTT.Client("192.168.9.1", Number(1884), "/ws", "lovehotelcontrol");
+
+      // set callback handlers
+      client.onConnectionLost = onConnectionLost;
+      client.onMessageArrived = onMessageArrived;
+
+
+      //console.log(client);
+      if (client.isConnected) {
+        //alert("Problem connection , kindly contact system admin .");
+        document.getElementById("mqttstatus").innerHTML = "MQTT Status: <mqttdisconnect>Disconnect</mqttdisconnect>";
+      }
+
+
+      // connect the client
+      client.connect({onSuccess:onConnect, userName : "chang", password : "chang"});
+
+      // called when the client connects
+      function onConnect() {
+        var d = new Date();
+        // Once a connection has been made, make a subscription and send a message.
+        console.log("onConnect");
+        document.getElementById("mqttstatus").innerHTML = "MQTT Status: <mqttconnected>Connected</mqttconnected>";
+        //client.subscribe("room/+/timer");
+        client.subscribe("room/+/status");
+        client.subscribe("room/+/start");
+        client.subscribe("room/+/stop");
+
+
+        var roomstep;
+        for (roomstep = 1; roomstep <= MAXROOM; roomstep++) {
+          messageSend("room/" + roomstep.toString() + "/currenttime", Math.round(d.getTime() / 1000).toString(), true); // send current time to switch room/1/currenttime
+          messageSend("room/" + roomstep.toString(), "2", false); // 2 = get status from switch, room/1/status
+        }
+      }
+
+      // called when the client loses its connection
+      function onConnectionLost(responseObject) {
+        if (responseObject.errorCode !== 0) {
+          console.log("onConnectionLost:"+responseObject.errorMessage);
+          document.getElementById("mqttstatus").innerHTML = "MQTT Status: <mqttdisconnect>Disconnect</mqttdisconnect>";
+        }
+      }
+
+      function onMessageArrived(message) {
+        var d = new Date();
+        var lefttimer;
+        var topic;
+        var RoomNumber;
+
+
+        topic = message.topic;
+        //console.log(topic);
+        console.log("onMessageArrived:" + message.topic + " " + message.payloadString);
+        //if (message.payloadString == "OFF") {
+        //}
+        //else if(message.payloadString == "ON") {
+        //}
+
+        if(topic.search("stop") != -1) {
+          lefttimer = (parseInt(message.payloadString, 10) - Math.round(d.getTime() / 1000))/TIMEFACTOR;
+          console.log(lefttimer);
+          RoomNumber = topic.match(/\d+/)[0].toString();
+          if (lefttimer > 0) {
+            setstate = true;
+            if(!$('#room'+RoomNumber.toString()).hasClass('active')) {
+              $('#room'+RoomNumber.toString()).click();
+            }
+            setstate = false;
+            if(!("timer"+RoomNumber.toString() in timeOuts)) {
+              timeOuts["timer"+RoomNumber.toString()] = countdown(lefttimer, RoomNumber); // search number in topic 'room/1/stop'
+            }
+          }
+        }
+
+      }
+
+      function messageSend(topic, payload, retain) {
+        console.log("Send: " + topic + " " + payload + " " + retain);
+        var message = new Paho.MQTT.Message(payload);
+        message.destinationName = topic;
+        message.qos = 0;
+        if (retain) {
+          message.retained = true;
+        }
+        else {
+          message.retained = false;
+        }
+        client.send(message);
+      }
+
+      // countdown timer function
+
+      String.prototype.toHHMMSS = function () {
+        var sec_num = parseInt(this, 10); // don't forget the second param
+        var hours   = Math.floor(sec_num / 3600);
+        var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+        var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+        if (hours   < 10) {hours   = "0"+hours;}
+        if (minutes < 10) {minutes = "0"+minutes;}
+        if (seconds < 10) {seconds = "0"+seconds;}
+        return hours+':'+minutes+':'+seconds;
+      }
+
+      function countdown(countdowntimer, roomnumber) {
+
+        var timer = new Timer({
+          tick : 1,
+          ontick : function (msec) {
+              console.log('timer'+roomnumber+' interval', Math.round(msec/1000) );
+              document.getElementById('timer'+roomnumber.toString()).innerHTML = Math.round(msec/1000).toString().toHHMMSS();
+              //console.log(timer.getDuration());
+              //console.log('timer'+roomnumber);
+          },
+          onstart : function() {
+              console.log('room number '+roomnumber+' : timer started');
+          },
+          onstop  : function() {
+            console.log('timer stop')
+            document.getElementById('timer'+roomnumber.toString()).innerHTML = '00:00:00';
+          },
+          onend  : function() {
+            console.log('timer end')
+            document.getElementById('timer'+roomnumber.toString()).innerHTML = '00:00:00';
+            setstate = true;
+            $('#room'+roomnumber.toString()).click();
+            setstate = false;
+            //$('#room'+roomnumber.toString()).removeClass("active");
+            //document.getElementById('room'+roomnumber.toString()).innerHTML = "OFF"
+
+          }
+
+        });
+        timer.start(countdowntimer * TIMEFACTOR);
+        return timer;
+      }
+
+    </script>
+
+</body>
+</html>

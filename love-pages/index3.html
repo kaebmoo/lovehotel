@@ -269,12 +269,9 @@
           lefttimer = (parseInt(message.payloadString, 10) - Math.round(d.getTime() / 1000))/TIMEFACTOR;
           //console.log("room number: " + roomnumber);
           //console.log("room option: " + roomoption);
-          if(lefttimer>0) {
-            if($('#room3status').prop('checked')) {
-              timeOuts["room3"] = countdown(lefttimer, 3);
-            }
+          if($('#room3status').prop('checked')) {
+            timeOuts["room3"] = countdown(lefttimer, 3);
           }
-
 
           break;
         case "room/2/stop" :
@@ -282,10 +279,8 @@
           lefttimer = (parseInt(message.payloadString, 10) - Math.round(d.getTime() / 1000))/TIMEFACTOR;
           //console.log("room number: " + roomnumber);
           //console.log("room option: " + roomoption);
-          if(lefttimer>0) {
-            if($('#room2status').prop('checked')) {
-              timeOuts["room2"] = countdown(lefttimer, 2);
-            }
+          if($('#room2status').prop('checked')) {
+            timeOuts["room2"] = countdown(lefttimer, 2);
           }
           break;
         case "room/1/stop" :
@@ -293,13 +288,11 @@
           lefttimer = (parseInt(message.payloadString, 10) - Math.round(d.getTime() / 1000))/TIMEFACTOR;
           //console.log("room number: " + roomnumber);
           //console.log("room option: " + roomoption);
-          if(lefttimer>0) {
-            if($('#room1status').prop('checked')) {
-              timeOuts["room1"] = countdown(lefttimer, 1);
-            }
+          if($('#room1status').prop('checked')) {
+            timeOuts["room1"] = countdown(lefttimer, 1);
           }
           break;
-        case "room/1/timer" : // ไม่ได้ใช้แล้ว ; not use 
+        case "room/1/timer" :
           document.getElementById('timer1').innerHTML = message.payloadString;
           break;
         case "room/2/timer" :
@@ -346,7 +339,7 @@
             offstate = true;
           }
           break;
-        case "room/3/status" :
+        case "room3status" :
           //console.log(message.payloadString);
           if (message.payloadString == "OFF") {
             $('#room3status').bootstrapToggle('enable');

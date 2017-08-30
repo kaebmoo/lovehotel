@@ -64,11 +64,11 @@ PubSubClient client(espClient);
 char *mqtt_user = "chang";
 char *mqtt_password = "chang";
 
-char *myRoom = "room/2";
-char *room_status = "room/2/status";
-char *room_start = "room/2/start";
-char *room_stop = "room/2/stop";
-char *room_currenttime = "room/2/currenttime";
+char *myRoom = "room/1";
+char *room_status = "room/1/status";
+char *room_start = "room/1/start";
+char *room_stop = "room/1/stop";
+char *room_currenttime = "room/1/currenttime";
 
 int mqtt_reconnect = 0;
 int wifi_reconnect = 0;
