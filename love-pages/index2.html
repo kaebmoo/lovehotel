@@ -1,6 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
+<!--
+  MIT License
+
+Copyright (c) 2017 kaebmoo gmail com
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -104,6 +127,7 @@
               <th>ID</th>
               <th>Name</th>
               <th>Switch</th>
+              <th>Housekeeping</th>
               <th>Timer (Hours)</th>
               <th>Time Left</th>
             </thead>
@@ -114,11 +138,18 @@
               <td>{{item.id}}</td>
               <td>{{item.name}}</td>
               <td>
-                <div class="span2">
+
                   <button type="button" class="btn btn-default btn-block" id="{{item.switchid}}" ng-model="item.toggle" ng-change="onButtonClick($index)" uib-btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0">
                     {{item.toggle? "ON":"OFF"}}
                   </button>
-                  </div>
+
+              </td>
+              <td>
+
+                  <button type="button" class="btn btn-default btn-block" id="{{item.maswitch}}" value="{{item.labelSW}}" ng-model="item.toggle" ng-disabled="item.ma != '1'" ng-change="onMaintenance($index)" uib-btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0">
+                    {{item.labelSW}}
+                  </button>
+
               </td>
               <!-- <td align="center"><input checked data-toggle="toggle" type="checkbox" data-on="ON" data-off="OFF" data-onstyle="danger" data-offstyle="light" ng-model="item.toggle" ng-change="onItemChange($index)">{{item.toggle}}</td> -->
               <!-- <td align="center"><input type="checkbox" ng-model="item.toggle" ng-change="onItemChange($index)">{{item.toggle}}</td> -->
@@ -152,15 +183,35 @@
 	    app.controller("electricalController", function($scope) {
 
   	    $scope.name = "Love Hotel Electric Control";
+        $scope.mabutton = "OFF";
   		  $scope.debug = "output debug here"
   	    $scope.items = [
-  			{ id: "room/1", name: "Room 01", pub: "", sub: "", toggle: 0, switchid: "room1", timerbadge:"timer1", timer:3, timer_options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
-  			{ id: "room/2", name: "Room 02", pub: "", sub: "", toggle: 0, switchid: "room2", timerbadge:"timer2", timer:3, timer_options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
-  			{ id: "room/3", name: "Room 03", pub: "", sub: "", toggle: 0, switchid: "room3", timerbadge:"timer3", timer:3,  timer_options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
-  			{ id: "room/4", name: "Room 04", pub: "", sub: "", toggle: 0, switchid: "room4", timerbadge:"timer4", timer:3,  timer_options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
-  			{ id: "room/5", name: "Room 05", pub: "", sub: "", toggle: 0, switchid: "room5", timerbadge:"timer5", timer:3,  timer_options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
+  			{ id: "room/1", name: "Room 01", labelSW: "OFF", maswitch: "ma1", ma: 1, toggle: 0, switchid: "room1", timerbadge:"timer1", timer:3, timer_options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
+  			{ id: "room/2", name: "Room 02", labelSW: "OFF", maswitch: "ma2", ma: 1, toggle: 0, switchid: "room2", timerbadge:"timer2", timer:3, timer_options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
+  			{ id: "room/3", name: "Room 03", labelSW: "OFF", maswitch: "ma3", ma: 1, toggle: 0, switchid: "room3", timerbadge:"timer3", timer:3,  timer_options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
+  			{ id: "room/4", name: "Room 04", labelSW: "OFF", maswitch: "ma4", ma: 1, toggle: 0, switchid: "room4", timerbadge:"timer4", timer:3,  timer_options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
+  			{ id: "room/5", name: "Room 05", labelSW: "OFF", maswitch: "ma5", ma: 1, toggle: 0, switchid: "room5", timerbadge:"timer5", timer:3,  timer_options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
   	    ];
 
+        $scope.onMaintenance = function (index) {
+          var room = $scope.items[index];
+          room.ma = !room.ma;
+
+          room.labelSW = "Maintenance";
+
+          if(room.timerbadge in timeOuts) {
+            timeOuts[room.timerbadge].stop();
+          }
+
+          $scope.debug = "ID:" + room.id + ", Name:" + room.name + ", MA:" + room.ma + ", Toggle:" + (room.toggle? "1":"0") + ", Timer:" + (room.timer);
+          if(room.toggle) {
+            messageSend(room.id, "1", false);
+          }
+          else {
+            messageSend(room.id, "0", false);
+          }
+
+        }
         $scope.onButtonClick = function (index) {
           var room = $scope.items[index];
           var d = new Date();
@@ -169,11 +220,18 @@
           var currenttime;
           var roomtimer;
           roomtimer = room.timer;
+          room.ma = !room.toggle;
+          $scope.debug = "ID:" + room.id + ", Name:" + room.name + ", MA:" + room.ma + ", Toggle:" + (room.toggle? "1":"0") + ", Timer:" + (room.timer);
 
-          $scope.debug = "ID:" + room.id + ", Name:" + room.name + ", Toggle:" + (room.toggle? "1":"0") + ", Timer:" + (room.timer);
+
+
+          //$('#'+room.maswitch).prop('disabled', true);
+          //console.log('#'+room.maswitch);
 
           if (!setstate) {
             if(room.toggle) {
+              $('#'+room.maswitch).addClass('disabled');
+              room.labelSW = "NO";
               $scope.status = "ON";
               starttime = Math.round(d.getTime() / 1000);
               stoptime = starttime + (roomtimer * TIMEFACTOR);
@@ -182,9 +240,14 @@
               messageSend(room.id+"/start", starttime.toString(), true);
               messageSend(room.id+"/stop", stoptime.toString(), true);
               messageSend(room.id+"/currenttime", currenttime.toString(), true);
+              if(room.timerbadge in timeOuts) {
+                timeOuts[room.timerbadge].stop();
+              }
               timeOuts[room.timerbadge] = countdown(roomtimer, index+1);
             }
             else {
+              $('#'+room.maswitch).removeClass('disabled');
+              room.labelSW = "OFF";
               $scope.status = "OFF";
               if(room.timerbadge in timeOuts) {
                 timeOuts[room.timerbadge].stop();
@@ -203,8 +266,12 @@
   	    $scope.onItemChange = function (index) {
   			   var room = $scope.items[index];
 
-  			   $scope.debug = "ID:" + room.id + ", Name:" + room.name + ", Toggle:" + (room.toggle? "1":"0") + ", Timer:" + (room.timer);
+  			   $scope.debug = "ID:" + room.id + ", Name:" + room.name + ", MA:" + room.ma + ", Toggle:" + (room.toggle? "1":"0") + ", Timer:" + (room.timer);
 
+           // we need to extend timer
+           // currenttime + duration = stoptime
+           // new stoptime = (currenttime + duration) + new timer
+           // send stop topic with new stoptime
   	    }
 
 	   });
@@ -347,6 +414,8 @@
             document.getElementById('timer'+roomnumber.toString()).innerHTML = '00:00:00';
             setstate = true;
             $('#room'+roomnumber.toString()).click();
+            $('#ma'+roomnumber.toString()).removeClass('disabled');
+            $('#ma'+roomnumber.toString()).text('OFF');
             setstate = false;
             //$('#room'+roomnumber.toString()).removeClass("active");
             //document.getElementById('room'+roomnumber.toString()).innerHTML = "OFF"
