@@ -208,8 +208,6 @@ SOFTWARE.
           //room.ma = room.toggle;
           //$('#'+room.maswitch).prop('disabled', true);
 
-
-
           if(room.timerbadge in timeOuts) {
             timeOuts[room.timerbadge].stop();
           }
@@ -220,6 +218,7 @@ SOFTWARE.
             angular.element(document.querySelector('#'+room.maswitch)).addClass($scope.myStatus.keeping);
             room.labelSW = "Maintenance";
             messageSend(room.id, "1", false);
+            messageSend(room.id+"/maintenance", "1", true);
 
           }
           else {
@@ -227,10 +226,11 @@ SOFTWARE.
             angular.element(document.querySelector('#'+room.maswitch)).addClass($scope.myStatus.avail);
             room.labelSW = "Available";
             messageSend(room.id, "0", false);
-
+            messageSend(room.id+"/maintenance", "0", true);
           }
-
         }
+
+
         $scope.onButtonClick = function (index) {
           var room = $scope.items[index];
           var d = new Date();
@@ -362,6 +362,7 @@ SOFTWARE.
            client.subscribe("room/+/status");
            client.subscribe("room/+/start");
            client.subscribe("room/+/stop");
+           client.subscribe("room/+/maintenance");
 
 
            var roomstep;
@@ -393,6 +394,17 @@ SOFTWARE.
            //}
            //else if(message.payloadString == "ON") {
            //}
+           if(topic.search("maintenance") != -1){
+             if (message.payloadString === "1") {
+               RoomNumber = topic.match(/\d+/)[0].toString();
+               setstate = true;
+               if(!$('#room'+RoomNumber.toString()).hasClass('active')) {
+                 $scope.items[RoomNumber-1].timer = 0;
+                 $('#room'+RoomNumber.toString()).click(); // call click button
+               }
+               setstate = false;
+             }
+           }
 
            if(topic.search("stop") != -1) {
              lefttimer = (parseInt(message.payloadString, 10) - Math.round(d.getTime() / 1000))/TIMEFACTOR;
