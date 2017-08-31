@@ -180,13 +180,14 @@ SOFTWARE.
       var timeOuts = new Array(); // keep timer instance
 
       var app = angular.module("lovehotel",['ui.bootstrap']);
+
 	    app.controller("electricalController", function($scope) {
 
   	    $scope.name = "Love Hotel Electric Control";
         $scope.mabutton = "OFF";
   		  $scope.debug = "output debug here"
   	    $scope.items = [
-  			{ id: "room/1", name: "Room 01", labelSW: "OFF", maswitch: "ma1", ma: 1, toggle: 0, switchid: "room1", timerbadge:"timer1", timer:3, timer_options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
+  			{ id: "room/1", name: "Room 01", labelSW: "OFF", maswitch: "ma1", ma: 1, toggle: 0, switchid: "room1", timerbadge:"timer1", timer:1, timer_options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
   			{ id: "room/2", name: "Room 02", labelSW: "OFF", maswitch: "ma2", ma: 1, toggle: 0, switchid: "room2", timerbadge:"timer2", timer:3, timer_options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
   			{ id: "room/3", name: "Room 03", labelSW: "OFF", maswitch: "ma3", ma: 1, toggle: 0, switchid: "room3", timerbadge:"timer3", timer:3,  timer_options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
   			{ id: "room/4", name: "Room 04", labelSW: "OFF", maswitch: "ma4", ma: 1, toggle: 0, switchid: "room4", timerbadge:"timer4", timer:3,  timer_options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
@@ -212,6 +213,7 @@ SOFTWARE.
           }
 
         }
+
         $scope.onButtonClick = function (index) {
           var room = $scope.items[index];
           var d = new Date();
@@ -274,158 +276,168 @@ SOFTWARE.
            // send stop topic with new stoptime
   	    }
 
+        //
+        // change button color
+        $("button").click(function(){
+           $("button").removeClass("active");
+           $(this).addClass("active");
+         });
+
+         // MQTT
+
+         const MAXROOM = 5;
+
+         // Create a client instance: Broker, Port, Websocket Path, Client ID
+         client = new Paho.MQTT.Client("192.168.9.1", Number(1884), "/ws", "lovehotelcontrol");
+
+         // set callback handlers
+         client.onConnectionLost = onConnectionLost;
+         client.onMessageArrived = onMessageArrived;
+
+
+         //console.log(client);
+         if (client.isConnected) {
+           //alert("Problem connection , kindly contact system admin .");
+           document.getElementById("mqttstatus").innerHTML = "MQTT Status: <mqttdisconnect>Disconnect</mqttdisconnect>";
+         }
+
+
+         // connect the client
+         client.connect({onSuccess:onConnect, userName : "chang", password : "chang"});
+
+         // called when the client connects
+         function onConnect() {
+           var d = new Date();
+           // Once a connection has been made, make a subscription and send a message.
+           console.log("onConnect");
+           document.getElementById("mqttstatus").innerHTML = "MQTT Status: <mqttconnected>Connected</mqttconnected>";
+           //client.subscribe("room/+/timer");
+           client.subscribe("room/+/status");
+           client.subscribe("room/+/start");
+           client.subscribe("room/+/stop");
+
+
+           var roomstep;
+           for (roomstep = 1; roomstep <= MAXROOM; roomstep++) {
+             messageSend("room/" + roomstep.toString() + "/currenttime", Math.round(d.getTime() / 1000).toString(), true); // send current time to switch room/1/currenttime
+             messageSend("room/" + roomstep.toString(), "2", false); // 2 = get status from switch, room/1/status
+           }
+         }
+
+         // called when the client loses its connection
+         function onConnectionLost(responseObject) {
+           if (responseObject.errorCode !== 0) {
+             console.log("onConnectionLost:"+responseObject.errorMessage);
+             document.getElementById("mqttstatus").innerHTML = "MQTT Status: <mqttdisconnect>Disconnect</mqttdisconnect>";
+           }
+         }
+
+         function onMessageArrived(message) {
+           var d = new Date();
+           var lefttimer;
+           var topic;
+           var RoomNumber;
+
+
+           topic = message.topic;
+           //console.log(topic);
+           console.log("onMessageArrived:" + message.topic + " " + message.payloadString);
+           if (message.payloadString == "OFF") {
+           }
+           else if(message.payloadString == "ON") {
+
+           }
+
+           if(topic.search("stop") != -1) {
+             lefttimer = (parseInt(message.payloadString, 10) - Math.round(d.getTime() / 1000))/TIMEFACTOR;
+
+             RoomNumber = topic.match(/\d+/)[0].toString();
+             console.log('Room:'+ RoomNumber + ' ' + lefttimer);
+             if (lefttimer > 0) {
+               setstate = true;
+               if(!$('#room'+RoomNumber.toString()).hasClass('active')) {
+                 $('#room'+RoomNumber.toString()).click();
+               }
+               setstate = false;
+               if(!("timer"+RoomNumber.toString() in timeOuts)) {
+                 timeOuts["timer"+RoomNumber.toString()] = countdown(lefttimer, RoomNumber); // search number in topic 'room/1/stop'
+               }
+             }
+           }
+
+         }
+
+         function messageSend(topic, payload, retain) {
+           console.log("Send: " + topic + " " + payload + " " + retain);
+           var message = new Paho.MQTT.Message(payload);
+           message.destinationName = topic;
+           message.qos = 0;
+           if (retain) {
+             message.retained = true;
+           }
+           else {
+             message.retained = false;
+           }
+           client.send(message);
+         }
+
+         // countdown timer function
+
+         String.prototype.toHHMMSS = function () {
+           var sec_num = parseInt(this, 10); // don't forget the second param
+           var hours   = Math.floor(sec_num / 3600);
+           var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+           var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+           if (hours   < 10) {hours   = "0"+hours;}
+           if (minutes < 10) {minutes = "0"+minutes;}
+           if (seconds < 10) {seconds = "0"+seconds;}
+           return hours+':'+minutes+':'+seconds;
+         }
+
+         function countdown(countdowntimer, roomnumber) {
+
+           var timer = new Timer({
+             tick : 1,
+             ontick : function (msec) {
+                 console.log('timer'+roomnumber+' interval', Math.round(msec/1000) );
+                 document.getElementById('timer'+roomnumber.toString()).innerHTML = Math.round(msec/1000).toString().toHHMMSS();
+                 //console.log(timer.getDuration());
+                 //console.log('timer'+roomnumber);
+             },
+             onstart : function() {
+                 console.log('room number '+roomnumber+' : timer started');
+             },
+             onstop  : function() {
+               console.log('timer stop')
+               document.getElementById('timer'+roomnumber.toString()).innerHTML = '00:00:00';
+             },
+             onend  : function() {
+               console.log('timer end')
+               document.getElementById('timer'+roomnumber.toString()).innerHTML = '00:00:00';
+               setstate = true;
+               $('#room'+roomnumber.toString()).click();
+               $('#room'+roomnumber.toString()).text('OFF');
+               $('#ma'+roomnumber.toString()).removeClass('disabled');
+               $('#ma'+roomnumber.toString()).text('OFF');
+               setstate = false;
+               //$('#room'+roomnumber.toString()).removeClass("active");
+               //document.getElementById('room'+roomnumber.toString()).innerHTML = "OFF"
+
+             }
+
+           });
+           timer.start(countdowntimer * TIMEFACTOR);
+           return timer;
+         }
+
+
+
+        //
+
 	   });
 
-     // change button color
-     $("button").click(function(){
-        $("button").removeClass("active");
-        $(this).addClass("active");
-      });
 
-      // MQTT
-
-      const MAXROOM = 5;
-
-      // Create a client instance: Broker, Port, Websocket Path, Client ID
-      client = new Paho.MQTT.Client("192.168.9.1", Number(1884), "/ws", "lovehotelcontrol");
-
-      // set callback handlers
-      client.onConnectionLost = onConnectionLost;
-      client.onMessageArrived = onMessageArrived;
-
-
-      //console.log(client);
-      if (client.isConnected) {
-        //alert("Problem connection , kindly contact system admin .");
-        document.getElementById("mqttstatus").innerHTML = "MQTT Status: <mqttdisconnect>Disconnect</mqttdisconnect>";
-      }
-
-
-      // connect the client
-      client.connect({onSuccess:onConnect, userName : "chang", password : "chang"});
-
-      // called when the client connects
-      function onConnect() {
-        var d = new Date();
-        // Once a connection has been made, make a subscription and send a message.
-        console.log("onConnect");
-        document.getElementById("mqttstatus").innerHTML = "MQTT Status: <mqttconnected>Connected</mqttconnected>";
-        //client.subscribe("room/+/timer");
-        client.subscribe("room/+/status");
-        client.subscribe("room/+/start");
-        client.subscribe("room/+/stop");
-
-
-        var roomstep;
-        for (roomstep = 1; roomstep <= MAXROOM; roomstep++) {
-          messageSend("room/" + roomstep.toString() + "/currenttime", Math.round(d.getTime() / 1000).toString(), true); // send current time to switch room/1/currenttime
-          messageSend("room/" + roomstep.toString(), "2", false); // 2 = get status from switch, room/1/status
-        }
-      }
-
-      // called when the client loses its connection
-      function onConnectionLost(responseObject) {
-        if (responseObject.errorCode !== 0) {
-          console.log("onConnectionLost:"+responseObject.errorMessage);
-          document.getElementById("mqttstatus").innerHTML = "MQTT Status: <mqttdisconnect>Disconnect</mqttdisconnect>";
-        }
-      }
-
-      function onMessageArrived(message) {
-        var d = new Date();
-        var lefttimer;
-        var topic;
-        var RoomNumber;
-
-
-        topic = message.topic;
-        //console.log(topic);
-        console.log("onMessageArrived:" + message.topic + " " + message.payloadString);
-        //if (message.payloadString == "OFF") {
-        //}
-        //else if(message.payloadString == "ON") {
-        //}
-
-        if(topic.search("stop") != -1) {
-          lefttimer = (parseInt(message.payloadString, 10) - Math.round(d.getTime() / 1000))/TIMEFACTOR;
-          console.log(lefttimer);
-          RoomNumber = topic.match(/\d+/)[0].toString();
-          if (lefttimer > 0) {
-            setstate = true;
-            if(!$('#room'+RoomNumber.toString()).hasClass('active')) {
-              $('#room'+RoomNumber.toString()).click();
-            }
-            setstate = false;
-            if(!("timer"+RoomNumber.toString() in timeOuts)) {
-              timeOuts["timer"+RoomNumber.toString()] = countdown(lefttimer, RoomNumber); // search number in topic 'room/1/stop'
-            }
-          }
-        }
-
-      }
-
-      function messageSend(topic, payload, retain) {
-        console.log("Send: " + topic + " " + payload + " " + retain);
-        var message = new Paho.MQTT.Message(payload);
-        message.destinationName = topic;
-        message.qos = 0;
-        if (retain) {
-          message.retained = true;
-        }
-        else {
-          message.retained = false;
-        }
-        client.send(message);
-      }
-
-      // countdown timer function
-
-      String.prototype.toHHMMSS = function () {
-        var sec_num = parseInt(this, 10); // don't forget the second param
-        var hours   = Math.floor(sec_num / 3600);
-        var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
-        var seconds = sec_num - (hours * 3600) - (minutes * 60);
-
-        if (hours   < 10) {hours   = "0"+hours;}
-        if (minutes < 10) {minutes = "0"+minutes;}
-        if (seconds < 10) {seconds = "0"+seconds;}
-        return hours+':'+minutes+':'+seconds;
-      }
-
-      function countdown(countdowntimer, roomnumber) {
-
-        var timer = new Timer({
-          tick : 1,
-          ontick : function (msec) {
-              console.log('timer'+roomnumber+' interval', Math.round(msec/1000) );
-              document.getElementById('timer'+roomnumber.toString()).innerHTML = Math.round(msec/1000).toString().toHHMMSS();
-              //console.log(timer.getDuration());
-              //console.log('timer'+roomnumber);
-          },
-          onstart : function() {
-              console.log('room number '+roomnumber+' : timer started');
-          },
-          onstop  : function() {
-            console.log('timer stop')
-            document.getElementById('timer'+roomnumber.toString()).innerHTML = '00:00:00';
-          },
-          onend  : function() {
-            console.log('timer end')
-            document.getElementById('timer'+roomnumber.toString()).innerHTML = '00:00:00';
-            setstate = true;
-            $('#room'+roomnumber.toString()).click();
-            $('#ma'+roomnumber.toString()).removeClass('disabled');
-            $('#ma'+roomnumber.toString()).text('OFF');
-            setstate = false;
-            //$('#room'+roomnumber.toString()).removeClass("active");
-            //document.getElementById('room'+roomnumber.toString()).innerHTML = "OFF"
-
-          }
-
-        });
-        timer.start(countdowntimer * TIMEFACTOR);
-        return timer;
-      }
 
     </script>
 
