@@ -146,13 +146,14 @@ SOFTWARE.
               </td>
               <td>
 
-                  <button type="button" class="btn btn-default btn-block" ng-model="item.toggle" ng-disabled="item.ma != '1'" ng-change="onMaintenance($index)" uib-btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0">
+                  <button type="button" class="btn btn-default btn-block" ng-model="item.toggle" ng-disabled="true" ng-change="onMaintenance($index)" uib-btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0">
                   <span class="glyphicon glyphicon-ok" aria-hidden="true" ng-class="{{myStatus.avail}}" id="{{item.maswitch}}"></span> {{item.labelSW}}
                   </button>
                   <!--
                   ng-init="avail=false"
                   ng-click="avail=!avail"
-                  {'glyphicon-wrench' : off, 'glyphicon-ok' : !off}" -->
+                  {'glyphicon-wrench' : off, 'glyphicon-ok' : !off}"
+                item.lstatus != '1'-->
 
               </td>
               <!-- <td align="center"><input checked data-toggle="toggle" type="checkbox" data-on="ON" data-off="OFF" data-onstyle="danger" data-offstyle="light" ng-model="item.toggle" ng-change="onItemChange($index)">{{item.toggle}}</td> -->
@@ -190,11 +191,11 @@ SOFTWARE.
         $scope.mabutton = "OFF";
 
   	    $scope.items = [
-  			{ id: "room/1", name: "Room 01", labelSW: "Available", maswitch: "ma1", ma: 0, toggle: 0, switchid: "room1", timerbadge:"timer1", timer:0, timer_options: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
-  			{ id: "room/2", name: "Room 02", labelSW: "Available", maswitch: "ma2", ma: 0, toggle: 0, switchid: "room2", timerbadge:"timer2", timer:1, timer_options: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
-  			{ id: "room/3", name: "Room 03", labelSW: "Available", maswitch: "ma3", ma: 0, toggle: 0, switchid: "room3", timerbadge:"timer3", timer:3,  timer_options: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
-  			{ id: "room/4", name: "Room 04", labelSW: "Available", maswitch: "ma4", ma: 0, toggle: 0, switchid: "room4", timerbadge:"timer4", timer:3,  timer_options: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
-  			{ id: "room/5", name: "Room 05", labelSW: "Available", maswitch: "ma5", ma: 0, toggle: 0, switchid: "room5", timerbadge:"timer5", timer:3,  timer_options: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
+  			{ id: "room/1", name: "Room 01", labelSW: "Available", maswitch: "ma1", lstatus: 0, toggle: 0, switchid: "room1", timerbadge:"timer1", timer:1, timer_options: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
+  			{ id: "room/2", name: "Room 02", labelSW: "Available", maswitch: "ma2", lstatus: 0, toggle: 0, switchid: "room2", timerbadge:"timer2", timer:1, timer_options: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
+  			{ id: "room/3", name: "Room 03", labelSW: "Available", maswitch: "ma3", lstatus: 0, toggle: 0, switchid: "room3", timerbadge:"timer3", timer:3,  timer_options: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
+  			{ id: "room/4", name: "Room 04", labelSW: "Available", maswitch: "ma4", lstatus: 0, toggle: 0, switchid: "room4", timerbadge:"timer4", timer:3,  timer_options: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
+  			{ id: "room/5", name: "Room 05", labelSW: "Available", maswitch: "ma5", lstatus: 0, toggle: 0, switchid: "room5", timerbadge:"timer5", timer:3,  timer_options: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 48]},
   	    ];
         $scope.myStatus = {avail:'glyphicon-ok', busy:'glyphicon-heart-empty', keeping:'glyphicon-wrench'};
         $scope.status = "Init";
@@ -203,16 +204,16 @@ SOFTWARE.
 
         $scope.onMaintenance = function (index) {
           var room = $scope.items[index];
-          //room.ma = !room.ma;
+          //room.lstatus = !room.lstatus;
 
-          //room.ma = room.toggle;
+          //room.lstatus = room.toggle;
           //$('#'+room.maswitch).prop('disabled', true);
 
           if(room.timerbadge in timeOuts) {
             timeOuts[room.timerbadge].stop();
           }
 
-          $scope.debug = "ID:" + room.id + ", Name:" + room.name + ", MA:" + room.ma + ", Toggle:" + (room.toggle? "1":"0") + ", Timer:" + (room.timer);
+          $scope.debug = "ID:" + room.id + ", Name:" + room.name + ", Status:" + room.lstatus + ", Toggle:" + (room.toggle? "1":"0") + ", Timer:" + (room.timer);
           if(room.toggle) {
             angular.element(document.querySelector('#'+room.maswitch)).removeClass($scope.myStatus.avail);
             angular.element(document.querySelector('#'+room.maswitch)).addClass($scope.myStatus.keeping);
@@ -243,15 +244,15 @@ SOFTWARE.
 
 
 
-          if(roomtimer == 0) {
-
+          if(roomtimer === 0) {
+            console.log("Hello house keeping.");
             $scope.onMaintenance(index);
             return;
           }
 
 
-          //room.ma = !room.toggle;
-          $scope.debug = "ID:" + room.id + ", Name:" + room.name + ", MA:" + room.ma + ", Toggle:" + (room.toggle? "1":"0") + ", Timer:" + (room.timer);
+          room.lstatus = !room.toggle;
+          $scope.debug = "ID:" + room.id + ", Name:" + room.name + ", Status:" + room.lstatus + ", Toggle:" + (room.toggle? "1":"0") + ", Timer:" + (room.timer);
 
 
 
@@ -296,12 +297,12 @@ SOFTWARE.
 
             }
           }
-          else {
-            if ($scope.status.localeCompare('Init') === 0) {
+          else { // still have some bug ;-)
+            if (($scope.status.localeCompare('Init') === 0) && (room.lstatus !== true)) {
               angular.element(document.querySelector('#'+room.maswitch)).removeClass($scope.myStatus.avail);
               angular.element(document.querySelector('#'+room.maswitch)).addClass($scope.myStatus.busy);
               room.labelSW = "Busy";
-              $scope.status = "ON";
+              //$scope.status = "ON";
             }
             else {
               angular.element(document.querySelector('#'+room.maswitch)).removeClass($scope.myStatus.busy);
@@ -315,7 +316,7 @@ SOFTWARE.
   	    $scope.onItemChange = function (index) {
   			   var room = $scope.items[index];
 
-  			   $scope.debug = "ID:" + room.id + ", Name:" + room.name + ", MA:" + room.ma + ", Toggle:" + (room.toggle? "1":"0") + ", Timer:" + (room.timer);
+  			   $scope.debug = "ID:" + room.id + ", Name:" + room.name + ", Status:" + room.lstatus + ", Toggle:" + (room.toggle? "1":"0") + ", Timer:" + (room.timer);
 
            // we need to extend timer
            // currenttime + duration = stoptime
