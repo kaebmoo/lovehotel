@@ -111,7 +111,11 @@ SOFTWARE.
       <div class="row">
           <div class="col-lg-12 text-left">
               <h1 class="mt-5">{{name}}</h1>
-              <p class="lead" id="mqttstatus">MQTT Status:</p>
+              <p class="lead" id="mqttstatus">MQTT Status: <mqttdisconnect>Disconnect</mqttdisconnect></p>
+              <div class="show" id="reconnetButton">
+                <input type="button" class='btn btn-default btn-xs' value="Reconnect" onClick="window.location.reload()">
+              </div>
+
               <ul class="list-unstyled">
                   <li></li>
               </ul>
@@ -200,10 +204,11 @@ SOFTWARE.
         $scope.myStatus = {avail:'glyphicon-ok', busy:'glyphicon-heart-empty', keeping:'glyphicon-wrench'};
         $scope.status = "Init";
         $scope.debug = "output debug here."
-
+        var MaintenanceTime = new Timer();
 
         $scope.onMaintenance = function (index) {
           var room = $scope.items[index];
+
           //room.lstatus = !room.lstatus;
 
           //room.lstatus = room.toggle;
@@ -218,6 +223,8 @@ SOFTWARE.
             angular.element(document.querySelector('#'+room.maswitch)).removeClass($scope.myStatus.avail);
             angular.element(document.querySelector('#'+room.maswitch)).addClass($scope.myStatus.keeping);
             room.labelSW = "Maintenance";
+            console.log('Maintenance Time: start');
+            MaintenanceTime.measureStart(room.id);
             messageSend(room.id, "1", false);
             messageSend(room.id+"/maintenance", "1", true);
 
@@ -226,6 +233,7 @@ SOFTWARE.
             angular.element(document.querySelector('#'+room.maswitch)).removeClass($scope.myStatus.keeping);
             angular.element(document.querySelector('#'+room.maswitch)).addClass($scope.myStatus.avail);
             room.labelSW = "Available";
+            console.log('Maintenance Time: ' + MaintenanceTime.measureStop(room.id)/1000);
             messageSend(room.id, "0", false);
             messageSend(room.id+"/maintenance", "0", true);
           }
@@ -343,11 +351,12 @@ SOFTWARE.
          client.onConnectionLost = onConnectionLost;
          client.onMessageArrived = onMessageArrived;
 
-
-         //console.log(client);
-         if (client.isConnected) {
-           //alert("Problem connection , kindly contact system admin .");
+         //console.log(client.isConnected);
+         if (!client.isConnected) {
+           alert("Problem connection , kindly contact system admin .");
            document.getElementById("mqttstatus").innerHTML = "MQTT Status: <mqttdisconnect>Disconnect</mqttdisconnect>";
+           $('#reconnetButton').toggleClass('hidden');
+
          }
 
 
@@ -360,6 +369,10 @@ SOFTWARE.
            // Once a connection has been made, make a subscription and send a message.
            console.log("onConnect");
            document.getElementById("mqttstatus").innerHTML = "MQTT Status: <mqttconnected>Connected</mqttconnected>";
+           $('#reconnetButton').toggleClass('hidden');
+           //angular.element(document.querySelector('#reconnetButton')).addClass('disabled');
+
+
            //client.subscribe("room/+/timer");
            client.subscribe("room/+/status");
            client.subscribe("room/+/start");
@@ -379,6 +392,7 @@ SOFTWARE.
            if (responseObject.errorCode !== 0) {
              console.log("onConnectionLost:"+responseObject.errorMessage);
              document.getElementById("mqttstatus").innerHTML = "MQTT Status: <mqttdisconnect>Disconnect</mqttdisconnect>";
+             $('#reconnetButton').toggleClass('hidden');
            }
          }
 
