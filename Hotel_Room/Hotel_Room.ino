@@ -30,6 +30,11 @@ SOFTWARE.
 #include <TimeLib.h>
 #include <Timer.h>
 
+//needed for library
+#include <DNSServer.h>
+#include <ESP8266WebServer.h>
+#include <WiFiManager.h>         //https://github.com/tzapu/WiFiManager
+
 /* Comment this out to disable prints and save space */
 #define BLYNK_PRINT Serial
 
@@ -242,8 +247,12 @@ void relay(boolean set)
 }
 
 void setup_wifi() {
+  WiFiManager wifiManager;
+  String APName;
 
   delay(10);
+
+  /*
   // We start by connecting to a WiFi network
   Serial.println();
   Serial.print("Connecting to ");
@@ -262,6 +271,10 @@ void setup_wifi() {
       break;
     }
   }
+  */
+  APName = "OgoSwitch-"+String(ESP.getChipId());
+  wifiManager.autoConnect(APName.c_str());
+  Serial.println("connected...yeey :)");
 
 
 
