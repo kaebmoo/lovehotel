@@ -251,7 +251,11 @@ void setup_wifi() {
   String APName;
 
   delay(10);
-
+  //sets timeout until configuration portal gets turned off
+  //useful to make it all retry or go to sleep
+  //in seconds
+  wifiManager.setTimeout(60);
+  
   /*
   // We start by connecting to a WiFi network
   Serial.println();
@@ -273,7 +277,13 @@ void setup_wifi() {
   }
   */
   APName = "OgoSwitch-"+String(ESP.getChipId());
-  wifiManager.autoConnect(APName.c_str());
+  if(!wifiManager.autoConnect(APName.c_str()) ) {
+    Serial.println("failed to connect and hit timeout");
+    delay(3000);
+    //reset and try again, or maybe put it to deep sleep
+    ESP.reset();
+    delay(5000);
+  }
   Serial.println("connected...yeey :)");
 
 
