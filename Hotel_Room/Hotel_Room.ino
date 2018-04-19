@@ -47,7 +47,7 @@ const char *ssid = "CAT-Register";
 const char *password = "";
 //const char* mqtt_server = "192.168.43.252";
 const char* mqtt_server = "192.168.9.1";
-//const char* mqtt_server = "192.168.8.50";
+//const char* mqtt_server = "192.168.8.50"; .9.1
 const int relayPin = D1;
 const int statusPin = D2;
 const int buzzer=D5; //Buzzer control port, default D5
@@ -143,7 +143,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
       bstop = false;
 
     } else if ((char)payload[0] == '2') {       // 2 - get status from D2 (connect D2 <---> D1) 
-        statusvalue = digitalRead(statusPin);
+        // statusvalue = digitalRead(statusPin);
+        statusvalue = digitalRead(relayPin);
         if (statusvalue == HIGH) {
           client.publish(room_status, "ON");
       }
@@ -254,7 +255,7 @@ void setup_wifi() {
   //sets timeout until configuration portal gets turned off
   //useful to make it all retry or go to sleep
   //in seconds
-  wifiManager.setTimeout(60);
+  wifiManager.setTimeout(300);
   
   /*
   // We start by connecting to a WiFi network
@@ -293,7 +294,7 @@ void setup_wifi() {
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 
-
+  /*
   WiFi.macAddress(mac);
   Serial.print("MAC: ");
   Serial.print(mac[0],HEX);
@@ -307,6 +308,7 @@ void setup_wifi() {
   Serial.print(mac[4],HEX);
   Serial.print(":");
   Serial.println(mac[5],HEX);
+  */
 
 }
 
