@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Love Hotel - Control</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap-switch-3.3.4/dist/css/bootstrap3/bootstrap-switch.css" rel="stylesheet">
+    <link href="../bootstrap-toggle/css/bootstrap-toggle.min.css" rel="stylesheet">
+
+
+    <!-- Custom styles for this template -->
+    <style>
+    body {
+        padding-top: 54px;
+    }
+
+    @media (min-width: 992px) {
+        body {
+            padding-top: 56px;
+        }
+    }
+    </style>
+
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <a class="navbar-brand" href="index.html">Love Hotel</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="about.html">About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="services.html">Services</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="contact.html">Contact</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-left">
+                <h1 class="mt-5">Love Hotel Control</h1>
+                <p class="lead">Complete with pre-defined file paths and responsive navigation!</p>
+                <ul class="list-unstyled">
+                    <li>Bootstrap 4.0.0-beta</li>
+                    <li>jQuery 3.2.1</li>
+                    <li id="mqttstatus">MQTT Connection:</li>
+                </ul>
+            </div>
+
+            <div class="col-lg-12 text-left">
+            <p>  Room 01
+                <div id="1" class="btn-group px-1" data-toggle="buttons">
+                  <label class="btn btn-outline-secondary">
+                    <input type="radio" name="options" value="1" autocomplete="off"> 1 Hour
+                  </label>
+                  <label class="btn btn-outline-secondary ">
+                    <input type="radio" name="options" value="2" autocomplete="off" > 2 Hours
+                  </label>
+                  <label class="btn btn-outline-secondary active">
+                    <input type="radio" name="options" value="3" autocomplete="off" checked> 3 Hours
+                  </label>
+                  <label class="btn btn-outline-secondary ">
+                    <input type="radio" name="options" value="24" autocomplete="off" > 24 Hours
+                  </label>
+                </div>
+                | Switch <input id="room1" checked data-toggle="toggle" type="checkbox" data-on="ON" data-off="OFF" data-onstyle="danger" data-offstyle="light">
+                | Status <input id="room1status" checked data-toggle="toggle" data-size="small" type="checkbox" data-on="Open" data-off="Close" data-onstyle="success" data-offstyle="light">
+                <span id="timer1" class="badge badge-secondary">00:00:00</span>
+              </p>
+                <p>
+                  Room 02
+                <div id="2" class="btn-group px-1" data-toggle="buttons">
+                  <label class="btn btn-outline-secondary ">
+                    <input type="radio" name="options" value="1" autocomplete="off" > 1 Hour
+                  </label>
+                  <label class="btn btn-outline-secondary ">
+                    <input type="radio" name="options" value="2" autocomplete="off" > 2 Hours
+                  </label>
+                  <label class="btn btn-outline-secondary active">
+                    <input type="radio" name="options" value="3" autocomplete="off" checked> 3 Hours
+                  </label>
+                  <label class="btn btn-outline-secondary">
+                    <input type="radio" name="options" value="24" autocomplete="off"> 24 Hours
+                  </label>
+                </div>
+                | Switch <input id="room2" checked data-toggle="toggle" type="checkbox" data-on="ON" data-off="OFF" data-onstyle="danger" data-offstyle="light">
+                | Status <input id="room2status" checked data-toggle="toggle" data-size="small" type="checkbox" data-on="Open" data-off="Close" data-onstyle="success" data-offstyle="light">
+                <span id="timer2" class="badge badge-secondary">00:00:00</span>
+                </p>
+                <p>
+                Room 03
+                <div id="3" class="btn-group px-1" data-toggle="buttons">
+                  <label class="btn btn-outline-secondary">
+                    <input type="radio" name="options" value="1" autocomplete="off"> 1 Hour
+                  </label>
+                  <label class="btn btn-outline-secondary ">
+                    <input type="radio" name="options" value="2" autocomplete="off" > 2 Hours
+                  </label>
+                  <label class="btn btn-outline-secondary active">
+                    <input type="radio" name="options" value="3" autocomplete="off" checked> 3 Hours
+                  </label>
+                  <label class="btn btn-outline-secondary">
+                    <input type="radio" name="options" value="24" autocomplete="off"> 24 Hours
+                  </label>
+                </div>
+                | Switch <input id="room3" checked data-toggle="toggle" type="checkbox" data-on="ON" data-off="OFF" data-onstyle="danger" data-offstyle="light">
+                | Status <input id="room3status" checked data-toggle="toggle" data-size="small" type="checkbox" data-on="Open" data-off="Close" data-onstyle="success" data-offstyle="light">
+                <span id="timer3" class="badge badge-secondary">00:00:00</span>
+                </p>
+              </div>
+
+
+
+            <div class="col-lg-6 text-center">
+
+            </dev>
+
+
+<!--
+            <button type="button" class="btn">Basic</button>
+            <div class="form-group">
+            <label for="Room1Hour">Hour</label>
+            <select class="form-control" id="Room1Hour">
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+              <option>6</option>
+              <option>24</option>
+
+              </select>
+              </div>
+
+              <div class="col-lg-6">
+                  <div class="input-group">
+                    <input type="text" class="form-control" aria-label="Text input with dropdown button">
+                    <div class="input-group-btn">
+                      <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        ON
+                      </button>
+                      <div class="dropdown-menu dropdown-menu-right">
+                        <a class="dropdown-item" href="#">1 hour</a>
+                        <a class="dropdown-item" href="#">2 hours</a>
+                        <a class="dropdown-item" href="#">3 hours</a>
+                        <div role="separator" class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#">24 hours</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+-->
+
+
+        </div>
+
+    </div>
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="../vendor/jquery/jquery.min.js"></script>
+    <script src="../vendor/popper/popper.min.js"></script>
+    <script src="../vendor/bootstrap/js/bootstrap.min.js"></script>
+    <script src="../bootstrap-toggle/js/bootstrap-toggle.min.js"></script>
+
+    <script src="../bootstrap-switch-3.3.4/dist/js/bootstrap-switch.js"></script>
+    <script src="../paho.javascript-1.0.3/paho-mqtt.js"></script>
+    <script src="../node_modules/timer.js/dist/timer.js"></script>
+
+    <script>
+    $('.hidden').removeClass('hidden').hide();
+    $('.toggle-text').click(function() {
+      $(this).find('span').each(function() {
+        $(this).toggle();
+      });
+    });
+
+    $('.button').click(function() {
+      $('.button').removeClass('btn-light').addClass('btn-primary ');
+      $(this).addClass('btn-light').removeClass('btn-primary ');
+    });
+    </script>
+
+    <script>
+    const MAXROOM = 3;
+
+    // Create a client instance: Broker, Port, Websocket Path, Client ID
+    client = new Paho.MQTT.Client("192.168.9.1", Number(1884), "/ws", "lovehotelcontrol");
+
+    // set callback handlers
+    client.onConnectionLost = onConnectionLost;
+    client.onMessageArrived = onMessageArrived;
+
+
+    console.log(client);
+    if (client.isConnected) {
+      //alert("Problem connection , kindly contact system admin .");
+      document.getElementById("mqttstatus").innerHTML = "MQTT Status: Disconnect";
+    }
+
+
+    // connect the client
+    client.connect({onSuccess:onConnect, userName : "chang", password : "chang"});
+
+    // called when the client connects
+    function onConnect() {
+      var d = new Date();
+      // Once a connection has been made, make a subscription and send a message.
+      console.log("onConnect");
+      document.getElementById("mqttstatus").innerHTML = "MQTT Status: Connected";
+      client.subscribe("room/+/timer");
+      client.subscribe("room/+/status");
+      client.subscribe("room/+/start");
+      client.subscribe("room/+/stop");
+
+
+      var roomstep;
+      for (roomstep = 1; roomstep <= MAXROOM; roomstep++) {
+        doSend("room/" + roomstep.toString() + "/currenttime", Math.round(d.getTime() / 1000).toString(), true);
+        doSend("room/" + roomstep.toString(), "2", false);
+      }
+
+      //client.subscribe("room/2/timer");
+      //client.subscribe("room/3/timer");
+      // message = new Paho.MQTT.Message("Hello");
+      // message.destinationName = "/World";
+      // client.send(message);
+    }
+
+    // called when the client loses its connection
+    function onConnectionLost(responseObject) {
+      if (responseObject.errorCode !== 0) {
+        console.log("onConnectionLost:"+responseObject.errorMessage);
+        document.getElementById("mqttstatus").innerHTML = "MQTT Status: Disconnect";
+      }
+    }
+
+    // called when a message arrives
+    function onMessageArrived(message) {
+      var d = new Date();
+      var lefttimer;
+
+      console.log("onMessageArrived:" + message.topic + " " + message.payloadString);
+      switch (message.destinationName) {
+        case "room/3/stop" :
+          console.log("time left: " + (parseInt(message.payloadString, 10) - Math.round(d.getTime() / 1000)) );
+          lefttimer = (parseInt(message.payloadString, 10) - Math.round(d.getTime() / 1000))/TIMEFACTOR;
+          //console.log("room number: " + roomnumber);
+          //console.log("room option: " + roomoption);
+          if(lefttimer>0) {
+            if($('#room3status').prop('checked')) {
+              timeOuts["room3"] = countdown(lefttimer, 3);
+            }
+          }
+
+
+          break;
+        case "room/2/stop" :
+          console.log("time left: " + (parseInt(message.payloadString, 10) - Math.round(d.getTime() / 1000)) );
+          lefttimer = (parseInt(message.payloadString, 10) - Math.round(d.getTime() / 1000))/TIMEFACTOR;
+          //console.log("room number: " + roomnumber);
+          //console.log("room option: " + roomoption);
+          if(lefttimer>0) {
+            if($('#room2status').prop('checked')) {
+              timeOuts["room2"] = countdown(lefttimer, 2);
+            }
+          }
+          break;
+        case "room/1/stop" :
+          console.log("time left: " + (parseInt(message.payloadString, 10) - Math.round(d.getTime() / 1000)) );
+          lefttimer = (parseInt(message.payloadString, 10) - Math.round(d.getTime() / 1000))/TIMEFACTOR;
+          //console.log("room number: " + roomnumber);
+          //console.log("room option: " + roomoption);
+          if(lefttimer>0) {
+            if($('#room1status').prop('checked')) {
+              timeOuts["room1"] = countdown(lefttimer, 1);
+            }
+          }
+          break;
+        case "room/1/timer" : // ไม่ได้ใช้แล้ว ; not use
+          document.getElementById('timer1').innerHTML = message.payloadString;
+          break;
+        case "room/2/timer" :
+          document.getElementById('timer2').innerHTML = message.payloadString;
+          break;
+        case "room/3/timer" :
+          document.getElementById('timer3').innerHTML = message.payloadString;
+          break;
+        case "room/1/status" :
+          //console.log(message.payloadString);
+          if (message.payloadString == "OFF") {
+            $('#room1status').bootstrapToggle('enable');
+            $('#room1status').bootstrapToggle('off');
+            $('#room1status').bootstrapToggle('disable');
+            offstate = false;
+            $('#room1').bootstrapToggle('off');
+            offstate = true;
+          }
+          else if (message.payloadString == "ON") {
+            $('#room1status').bootstrapToggle('enable');
+            $('#room1status').bootstrapToggle('on');
+            $('#room1status').bootstrapToggle('disable');
+            offstate = false;
+            $('#room1').bootstrapToggle('on');
+            offstate = true;
+          }
+          break;
+        case "room/2/status" :
+          //console.log(message.payloadString);
+          if (message.payloadString == "OFF") {
+            $('#room2status').bootstrapToggle('enable');
+            $('#room2status').bootstrapToggle('off');
+            $('#room2status').bootstrapToggle('disable');
+            offstate = false;
+            $('#room2').bootstrapToggle('off');
+            offstate = true;
+          }
+          else if (message.payloadString == "ON") {
+            $('#room2status').bootstrapToggle('enable');
+            $('#room2status').bootstrapToggle('on');
+            $('#room2status').bootstrapToggle('disable');
+            offstate = false;
+            $('#room2').bootstrapToggle('on');
+            offstate = true;
+          }
+          break;
+        case "room/3/status" :
+          //console.log(message.payloadString);
+          if (message.payloadString == "OFF") {
+            $('#room3status').bootstrapToggle('enable');
+            $('#room3status').bootstrapToggle('off');
+            $('#room3status').bootstrapToggle('disable');
+            offstate = false;
+            $('#room3').bootstrapToggle('off');
+            offstate = true;
+          }
+          else if (message.payloadString == "ON") {
+            $('#room3status').bootstrapToggle('enable');
+            $('#room3status').bootstrapToggle('on');
+            $('#room3status').bootstrapToggle('disable');
+            offstate = false;
+            $('#room3').bootstrapToggle('on');
+            offstate = true;
+          }
+          break;
+      }
+
+    }
+
+
+
+    // document.getElementById('timer3').innerHTML = "99:99"
+  </script>
+  <script>
+    var roomnumber;
+    var roomtimer;
+    var offstate = true;
+    const TIMEFACTOR = 3600;
+    var timeOuts = new Array();
+
+    $(function() {
+
+
+      $('#room3').bootstrapToggle('off');
+      $('#room2').bootstrapToggle('off');
+      $('#room1').bootstrapToggle('off');
+
+      $('#room3status').bootstrapToggle('off');
+      $('#room2status').bootstrapToggle('off');
+      $('#room1status').bootstrapToggle('off');
+      $('#room3status').bootstrapToggle('disable');
+      $('#room2status').bootstrapToggle('disable');
+      $('#room1status').bootstrapToggle('disable');
+
+      console.log($("#1 .active input").prop('value'));
+      console.log($("#2 .active input").prop('value'));
+      console.log($("#3 .active input").prop('value'));
+
+      $('#room1, #room2, #room3').change(function(e) {
+        // $('#console-event').html('Toggle: ' + $(this).prop('checked'))
+        var d = new Date();
+        var starttime = Math.round(d.getTime() / 1000);
+        var stoptime = Math.round(d.getTime() / 1000);
+        var currenttime = Math.round(d.getTime() / 1000);
+
+        if (offstate) {
+          switch(e.currentTarget.id) {
+            case "room3" :
+              roomnumber = 3;
+              roomtimer = $("#3 .active input").prop('value')
+              console.log("room : " + roomnumber + " : " + roomtimer);
+              break;
+            case "room2" :
+              roomnumber = 2;
+              roomtimer = $("#2 .active input").prop('value')
+              console.log("room : " + roomnumber + " : " + roomtimer);
+
+              break;
+            case "room1" :
+              roomnumber = 1;
+              roomtimer = $("#1 .active input").prop('value')
+              console.log("room : " + roomnumber + " : " + roomtimer);
+              break;
+          }
+
+          if ($(this).prop('checked')) {
+            console.log(e.currentTarget.id+" : ON");
+            //doSend("room/" + roomnumber.toString(), "1", false);
+            //doSend("room/" + roomnumber.toString() + "/status", "ON", true);
+            starttime = Math.round(d.getTime() / 1000);
+            stoptime = starttime + (roomtimer * TIMEFACTOR);
+            currenttime = Math.round(d.getTime() / 1000);
+            doSend("room/" + roomnumber.toString() + "/start", starttime.toString(), true);
+            doSend("room/" + roomnumber.toString() + "/stop", stoptime.toString(), true);
+            doSend("room/" + roomnumber.toString() + "/currenttime", currenttime.toString(), true);
+
+            timeOuts[e.currentTarget.id] = countdown(roomtimer, roomnumber);
+            console.log(timeOuts[e.currentTarget.id]);
+
+            //console.log("ON room number : " + roomoption + " hour : " + roomhour);
+          }
+          else {
+            console.log(e.currentTarget.id+" : OFF");
+            doSend("room/" + roomnumber.toString(), "0", false);
+            //doSend("room/" + roomnumber.toString() + "/status", "OFF", true);
+            currenttime = Math.round(d.getTime() / 1000);
+            doSend("room/" + roomnumber.toString() + "/start", "0", true);
+            doSend("room/" + roomnumber.toString() + "/stop", "0", true);
+            doSend("room/" + roomnumber.toString() + "/currenttime", currenttime.toString(), true);
+
+            if(e.currentTarget.id in timeOuts) {
+              timeOuts[e.currentTarget.id].stop();
+            }
+            //console.log("OFF room number : " + roomoption + " hour : " + roomhour);
+          }
+        }
+
+
+
+        //console.log($('.btn-group > .btn.active').text());
+        //console.log($("div#1 input[name=options]:checked, div#2 input[name=options]:checked, div#3 input[name=options]:checked").val());
+
+        //checkhour();
+
+
+      })
+    })
+
+    String.prototype.toHHMMSS = function () {
+      var sec_num = parseInt(this, 10); // don't forget the second param
+      var hours   = Math.floor(sec_num / 3600);
+      var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+      var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+      if (hours   < 10) {hours   = "0"+hours;}
+      if (minutes < 10) {minutes = "0"+minutes;}
+      if (seconds < 10) {seconds = "0"+seconds;}
+      return hours+':'+minutes+':'+seconds;
+    }
+
+    function countdown(countdowntimer, roomnumber) {
+
+      var timer = new Timer({
+        tick : 1,
+        ontick : function (msec) {
+            console.log('timer'+roomnumber+' interval', Math.round(msec/1000) );
+            document.getElementById('timer'+roomnumber.toString()).innerHTML = Math.round(msec/1000).toString().toHHMMSS();
+            //console.log(timer.getDuration());
+            //console.log('timer'+roomnumber);
+        },
+        onstart : function() {
+            console.log('room number '+roomnumber+' : timer started');
+        },
+        onstop  : function() {
+          console.log('timer stop')
+          document.getElementById('timer'+roomnumber.toString()).innerHTML = '00:00:00';
+        },
+        onend  : function() {
+          console.log('timer stop')
+          document.getElementById('timer'+roomnumber.toString()).innerHTML = '00:00:00';
+        }
+
+      });
+      timer.start(countdowntimer * TIMEFACTOR);
+      return timer;
+    }
+
+    function doSend(topic, payload, retain) {
+      console.log("Send: " + topic + " " + payload + " " + retain);
+      var message = new Paho.MQTT.Message(payload);
+      message.destinationName = topic;
+      message.qos = 0;
+      if (retain) {
+        message.retained = true;
+      }
+      else {
+        message.retained = false;
+      }
+      client.send(message);
+    }
+
+    //function checkhour() {
+    //  $("div#1 input[name=options]:checked").val(function() {
+    //    console.log($(this).val());
+    //  })
+    //}
+
+
+
+    var roomoption;
+    var roomhour;
+
+    $(function() {
+
+      //$('#room1option :input, #room2option :input, #room3option :input').change(function (e) {
+      $('.btn-group').change(function (e) {
+          //console.log($(this).attr('id'));
+          roomoption = $(this).attr('id');
+          setroom(roomoption, roomhour);
+      })
+      $('#1 :input, #2 :input, #3 :input').change(function (e) {
+        //console.log($(this).attr('id'));
+        roomhour = $(this).attr('value');
+      })
+
+
+
+
+      //console.log(roomoption);
+      //console.log(roomhour);
+
+    })
+    function setroom(room_number, hour) {
+      console.log("room number : " + room_number + " hour : " + hour);
+    }
+
+
+  </script>
+
+
+</body>
+
+</html>
